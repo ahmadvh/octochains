@@ -50,7 +50,7 @@ class Agent:
                     Patient's Report: {medical_report}
                 """
             }
-        templates = templates[self.role]
+            templates = templates[self.role]
         return PromptTemplate.from_template(templates)
     
     def run(self):
