@@ -16,13 +16,13 @@ It is **not intended for clinical use**.
 - Added **MIT License**  
 - Fixed bugs and updated `requirements.txt`  
 - Added `.gitignore`  
-- Upgraded core LLM to **GPT-5**  
+- Upgraded core LLM to **DeepSeek-V3**  
 
 ---
 
 ## 🚀 How It Works
 
-In the current version, we use **three AI agents (GPT-5)**, each specializing in a different aspect of medical analysis.  
+In the current version, we use **three AI agents (DeepSeek-V3)**, each specializing in a different aspect of medical analysis.  
 A medical report is passed to all agents, which run **in parallel (threading)** and return their findings.  
 The outputs are then combined and summarized into **three possible health issues** with reasoning.
 
@@ -53,7 +53,7 @@ The outputs are then combined and summarized into **three possible health issues
 
 1. **Clone the repo:**
    ```bash
-   git clone https://github.com/ahmadvh/AI-Agents-for-Medical-Diagnostics.git
+   git clone https://github.com/20000786/AI-Agents-for-Medical-Diagnostics.git
    cd AI-Agents-for-Medical-Diagnostics
    ```
 2. **Create a virtual environment and install dependencies:**
@@ -66,7 +66,7 @@ The outputs are then combined and summarized into **three possible health issues
     - Create a file named apikey.env in the project root.
     - Add your OpenAI (or other LLM provider) credentials:
     ```bash
-    OPENAI_API_KEY=your_api_key_here
+    API_TOKEN=your_api_key_here
     ```
 4. **Run the system:** `python main.py`
 ---
@@ -76,7 +76,7 @@ The outputs are then combined and summarized into **three possible health issues
 Planned improvements for upcoming versions include:
 
 - **Specialist Expansion**: Add new agents for Neurology, Endocrinology, Immunology, and other fields.  
-- **Local LLM Support**: Integrate models such as **Llama 4** via Ollama, vLLM, or llama.cpp, with function-calling style hooks and safe code execution.  
+- **Model Optimization**: Adapt to DeepSeek-V3 models provided by domestic platforms like ModelScope to enhance inference efficiency and usability. 
 - **Vision Capabilities**: Enable multimodal decision-making with agents that analyze **radiology images** and other medical scans.  
 - **Live Data Tools**: Incorporate LLM-based tools for **real-time search** and querying structured **medical datasets**.  
 - **Advanced Parsing**: Improve handling of complex medical reports with structured outputs (e.g., JSON schema validation).  

@@ -1,26 +1,48 @@
 Medical Case Report
-Patient ID: 345678
-Name: Michael Johnson
-Age: 29
-Gender: Male
+Patient ID: 789123
+Name: Sarah Chen
+Age: 35
+Gender: Female
 Date of Report: 2024-09-04
 
 Chief Complaint:
-The patient reports experiencing sudden episodes of intense chest pain, heart palpitations, shortness of breath, dizziness, and sweating over the past three months. These episodes typically last for about 10-20 minutes and occur without warning, usually once or twice a week. The patient describes a feeling of impending doom during these episodes and fears having a heart attack.
+The patient reports persistent epigastric pain, bloating, and intermittent nausea for the past four months. The pain is described as a burning sensation, often worsening between meals and at night. She also notes occasional acid regurgitation and early satiety. Symptoms partially relieve with food or antacids but recur frequently.
 
 Medical History:
-Family History: No known history of heart disease. Mother has generalized anxiety disorder; father has no significant medical history.
+Family History:
+Mother: History of gastric ulcers.
+Father: No significant gastrointestinal history.
 Personal Medical History:
-Anxiety: Diagnosed at age 25; managed with cognitive behavioral therapy (CBT) and occasional use of benzodiazepines.
-Gastroesophageal Reflux Disease (GERD): Diagnosed at age 27; managed with proton pump inhibitors (PPIs) and dietary changes.
-Lifestyle Factors: The patient works in a high-stress job as an investment banker, reports occasional use of caffeine and alcohol, and exercises irregularly.
-Medications: Lorazepam (0.5 mg as needed for anxiety), Omeprazole (20 mg daily).
+Helicobacter pylori Infection: Treated with triple therapy at age 30.
+Irritable Bowel Syndrome (IBS): Diagnosed at age 28, managed with dietary modifications.
+Generalized Anxiety Disorder: Diagnosed at age 26, managed with mindfulness and therapy.
+Lifestyle Factors:
+Works as a software developer with prolonged sedentary hours.
+Reports frequent consumption of spicy foods and coffee.
+Smokes occasionally (5-10 cigarettes/week).
+Alcohol: 1-2 glasses of wine weekly.
+Medications:
+Escitalopram (10 mg daily for anxiety).
+Hyoscine butylbromide (as needed for abdominal cramps).
 Recent Lab and Diagnostic Results:
-Electrocardiogram (ECG): Normal sinus rhythm; no signs of ischemia or arrhythmia detected.
-Blood Tests: Cardiac enzymes (troponin, CK-MB) within normal limits; thyroid function tests normal.
-Holter Monitor (24-hour monitoring): No significant arrhythmias; occasional premature ventricular contractions (PVCs) noted.
-Echocardiogram: Normal cardiac structure and function; ejection fraction 60%.
+Upper Gastrointestinal Endoscopy:
+Findings: Mild erythema and edema in the gastric antrum; no evidence of ulcers or erosions.
+Biopsy: Chronic gastritis; no evidence of H. pylori or intestinal metaplasia.
+Abdominal Ultrasound:
+Normal liver, gallbladder, pancreas, and spleen; no abnormalities detected.
+Blood Tests:
+Complete blood count (CBC): Within normal limits.
+Liver function tests (LFTs): Normal.
+H. pylori Stool Antigen Test: Negative.
 Physical Examination Findings:
-Vital Signs: Blood pressure 122/78 mmHg, heart rate 82 bpm, BMI 23.4.
-Cardiovascular Exam: Normal heart sounds; no murmurs, gallops, or rubs.
-Respiratory Exam: Clear breath sounds; no wheezing or crackles.
+Vital Signs:
+Blood Pressure: 118/76 mmHg
+Heart Rate: 72 bpm
+BMI: 22.1
+Abdominal Exam:
+Mild tenderness to palpation in the epigastric region.
+No guarding, rigidity, or rebound tenderness.
+Bowel sounds: Normal.
+No hepatosplenomegaly or palpable masses.
+General Appearance:
+Well-nourished, no signs of weight loss or pallor.
