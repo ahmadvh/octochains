@@ -1,5 +1,7 @@
 # Octochains
 <!-- <img align="right" width="250" alt="Octochains Logo" > -->
+!<img width="250" align="right" height="250" alt="octochains" src="https://github.com/user-attachments/assets/e45eb716-8910-438a-a595-1f96e2085ff2" />
+
 [![GOSIM Spotlight 2026](https://img.shields.io/badge/GOSIM_2026-Top_10_Featured_Project-blueviolet)](https://gosim.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://pypi.org/project/octochains/)
