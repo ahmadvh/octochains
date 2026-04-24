@@ -6,6 +6,7 @@
 
 **Octochains** is a lightweight, zero-dependency Python framework for **Collaborative AI Reasoning**. It moves away from "monolithic" AI responses toward a parallel, multi-expert architecture that eliminates "Expert Blindspots" in high-stakes decision-making.
 <img width="250" align="right" height="250" alt="octochains" src="https://github.com/user-attachments/assets/e45eb716-8910-438a-a595-1f96e2085ff2" />
+
 ---
 
 ### The Core Innovation
