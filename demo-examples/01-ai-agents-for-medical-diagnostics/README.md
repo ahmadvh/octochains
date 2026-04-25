@@ -2,6 +2,9 @@
 
 This demo showcases the power of the **Octochains** framework in a high-stakes, multidisciplinary medical scenario. It demonstrates how **collaborative isolated reasoning** can prevent diagnostic "tunnel vision" by having specialized AI agents independently evaluate the same patient dossier before reaching a collective consensus.
 
+<img width="1056" height="443" alt="364576315-b7c87bf6-dfff-42fe-b8d1-9be9e6c7ce86" src="https://github.com/user-attachments/assets/c02eff1e-70dd-4edb-b378-9baa06772276" />
+
+
 ---
 
 ## Getting Started
