@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octochains Medical AI | Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <div class="header">
+        <div class="tagline">AI Agents for Medical Diagnostics</div>
+        <div class="reset-hint">Press <span>ESC</span> to Reset</div>
+    </div>
+
+    <div class="page active">
+        <div class="left-panel">
+            <div class="canvas">
+                <div class="agent-box">
+                    <div id="working-text" class="blinking-text">Agents working in parallel...</div>
+                </div>
+
+                <div class="node pulse" id="n-doc">📄 Medical<br>Report</div>
+                
+                <div class="node agent" id="n-cardio">❤️ Cardiologist <div class="loader"></div></div>
+                <div class="node agent" id="n-psych">🧠 Psychologist <div class="loader"></div></div>
+                <div class="node agent" id="n-pulmo">🫁 Pulmonologist <div class="loader"></div></div>
+                <div class="node agent" id="n-neuro">🧠 Neurologist <div class="loader"></div></div>
+                <div class="node" id="n-llm">⚙️ Multidisciplinary Team <div class="loader"></div></div>
+                
+                <div class="node" id="n-final">✅ Medical<br>Diagnosis</div>
+
+               <svg>
+                <path id="p1-cardio" d="M 140 260 C 210 250, 220 100, 280 100" />
+                <path id="p1-psych"  d="M 140 260 C 210 250, 220 200, 280 200" />
+                <path id="p1-pulmo"  d="M 140 260 C 210 250, 220 300, 280 300" />
+                <path id="p1-neuro"  d="M 140 260 C 210 250, 220 400, 280 400" />
+                
+                <path id="p2-cardio" d="M 430 100 C 500 85, 510 280, 560 265" />
+                <path id="p2-psych"  d="M 430 200 C 500 185, 510 280, 560 265" />
+                <path id="p2-pulmo"  d="M 430 300 C 500 285, 510 280, 560 265" />
+                <path id="p2-neuro"  d="M 430 400 C 500 385, 510 280, 560 265" />
+
+                <path id="p3-final"  d="M 740 265 L 790 265" />
+
+                <circle r="5" class="dot phase1"><animateMotion begin="indefinite" dur="2s" repeatCount="1"><mpath href="#p1-cardio"/></animateMotion></circle>
+                <circle r="5" class="dot phase1"><animateMotion begin="indefinite" dur="2s" repeatCount="1"><mpath href="#p1-psych"/></animateMotion></circle>
+                <circle r="5" class="dot phase1"><animateMotion begin="indefinite" dur="2s" repeatCount="1"><mpath href="#p1-pulmo"/></animateMotion></circle>
+                <circle r="5" class="dot phase1"><animateMotion begin="indefinite" dur="2s" repeatCount="1"><mpath href="#p1-neuro"/></animateMotion></circle>
+
+                <circle r="5" class="dot phase2"><animateMotion begin="indefinite" dur="1s" repeatCount="1"><mpath href="#p2-cardio"/></animateMotion></circle>
+                <circle r="5" class="dot phase2"><animateMotion begin="indefinite" dur="1s" repeatCount="1"><mpath href="#p2-psych"/></animateMotion></circle>
+                <circle r="5" class="dot phase2"><animateMotion begin="indefinite" dur="1s" repeatCount="1"><mpath href="#p2-pulmo"/></animateMotion></circle>
+                <circle r="5" class="dot phase2"><animateMotion begin="indefinite" dur="1s" repeatCount="1"><mpath href="#p2-neuro"/></animateMotion></circle>
+            </svg>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="dropzone" id="dropzone">
+                <h2>📂 Drag Patient Report Here</h2>
+                <p>Drop a .txt file to start clinical synthesis</p>
+                <input type="file" id="file-input" style="display: none;" accept=".txt">
+            </div>
+
+            <div id="log-container" class="hidden-slide">
+                <div class="term-head">🤖 CLINICAL ASSISTANT</div>
+                <div class="chat-container" id="chat-container"></div>
+                <div class="chat-ui" id="chat-ui">
+                    <input type="text" id="chat-input" placeholder="Ask about the diagnosis...">
+                    <button id="chat-btn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-brand">
+        <!-- <span class="made-by">made by</span> -->
+         <img class="footer-logo" src="logo/logo.png" alt="Logo">
+        <span class="purple-brand">OCTOCHAINS</span>
+        
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

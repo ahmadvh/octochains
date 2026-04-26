@@ -1,4 +1,6 @@
+fastapi
+uvicorn
+python-multipart
 octochains
-langchain
-langchain-openai
+langchain_openai
 python-dotenv

@@ -1,0 +1,381 @@
+:root {
+    /* Gemini/Google Inspired Palette */
+    --bg-main: #f0f4f9;
+    --bg-surface: #ffffff;
+    --text-primary: #1f1f1f;
+    --text-secondary: #444746;
+    --border-light: #e3e3e3;
+    
+    /* Bubble Colors */
+    --user-bg: #d3e3fd; /* Soft Google Blue */
+    --user-text: #041e49;
+    --team-bg: #f0f4f9; /* Soft Gray */
+    --team-text: #1f1f1f;
+    
+    /* Gradients & Accents */
+    --gemini-gradient: linear-gradient(90deg, #1a73e8, #b328d3, #ea4335);
+    --header-height: 64px;
+}
+
+/* 1. GLOBAL RESET */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* 2. HEADER AREA */
+.header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.tagline {
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    background: var(--gemini-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.reset-hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.reset-hint span {
+    background: var(--bg-main);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* 3. FOOTER BRANDING */
+.footer-brand {
+    position: absolute;
+    bottom: 25px;
+    left: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 200;
+    background: var(--bg-surface);
+    padding: 12px 24px;
+    border-radius: 100px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border: 1px solid var(--border-light);
+}
+
+.purple-brand {
+    background: var(--gemini-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+}
+
+.footer-logo {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+/* 4. LAYOUT STRUCTURE */
+.page {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    padding-top: var(--header-height);
+}
+
+.left-panel {
+    flex: 1.6;
+    position: relative;
+    background: var(--bg-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.right-panel {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    box-shadow: -4px 0 24px rgba(0,0,0,0.04);
+    z-index: 10;
+    overflow: hidden;
+}
+
+/* 5. VISUALIZATION CANVAS & NODES */
+.canvas {
+    position: relative;
+    width: 900px;
+    height: 500px;
+    transform: scale(1.1);
+    transform-origin: center center;
+}
+
+.node {
+    position: absolute;
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-weight: 500;
+    font-size: 18px; /* Assuming you kept the bigger font */
+    border: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    /* 👇 Enhanced elevation shadow */
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.1), 0 3px 3px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Softened Node Colors */
+#n-doc { left: 20px; top: 215px;  width: 120px; border-left: 4px solid #34a853; box-shadow: 0 3px 3px rgba(0, 0, 0, 0.1), 0 3px 3px rgba(0, 0, 0, 0.1); }
+#n-cardio { left: 280px; top: 60px; width: 150px; border-left: 4px solid #ea4335; }
+#n-psych { left: 280px; top: 160px; width: 150px; border-left: 4px solid #fbbc04; }
+#n-pulmo { left: 280px; top: 260px; width: 150px; border-left: 4px solid #4285f4; }
+#n-neuro { left: 280px; top: 360px; width: 150px; border-left: 4px solid #b328d3; }
+#n-llm { left: 560px; top: 215px; width: 180px; background: #1f1f1f; color: white; border: none; }
+#n-final { left: 790px; top: 215px; width: 120px; background: #e6f4ea; color: #137333; border: 1px solid #ceead6; opacity: 0.5; }
+
+.agent-box {
+    position: absolute; left: 240px; top: 30px; width: 230px; height: 440px;
+    border: 1px dashed #c2e0ff; background: rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    z-index: 1;
+    backdrop-filter: blur(4px);
+}
+
+/* 6. DROPZONE STYLE */
+.dropzone {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #c7c7c7;
+    margin: 32px;
+    border-radius: 24px;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dropzone:hover {
+    border-color: #1a73e8;
+    background: #f8faff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(26, 115, 232, 0.08);
+}
+
+.dropzone h2 { font-size: 22px; font-weight: 500; margin-bottom: 8px; color: var(--text-primary); }
+.dropzone p { font-size: 14px; margin: 0; }
+
+/* 7. SLIDE-IN CHAT UI */
+.hidden-slide {
+    display: none;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: transform 0.5s cubic-bezier(0.2, 0, 0, 1), opacity 0.4s ease;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+    background: var(--bg-surface);
+}
+
+.hidden-slide.active {
+    display: flex;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.term-head {
+    padding: 20px 24px;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.term-head::before {
+    content: "✨";
+}
+
+.chat-container {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--bg-surface);
+}
+
+.chat-ui {
+    display: flex;
+    padding: 20px 24px;
+    background: var(--bg-surface);
+    gap: 12px;
+    align-items: center;
+}
+
+#chat-input {
+    flex: 1;
+    background: var(--bg-main);
+    border: 1px solid transparent;
+    border-radius: 100px;
+    padding: 16px 24px;
+    color: var(--text-primary);
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+#chat-input:focus { 
+    background: var(--bg-surface);
+    border-color: #c2e0ff; 
+    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+}
+
+#chat-btn {
+    padding: 16px 24px;
+    background: var(--text-primary);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+}
+
+#chat-btn:hover { 
+    background: #333; 
+    transform: translateY(-1px);
+}
+
+/* 8. MESSAGE BUBBLES */
+.bubble {
+    max-width: 85%;
+    padding: 14px 20px;
+    font-size: 15px;
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+.bubble.system {
+    align-self: center;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 8px 0;
+}
+
+.bubble.team {
+    align-self: flex-start;
+    background: var(--team-bg);
+    color: var(--team-text);
+    border-radius: 4px 24px 24px 24px; /* Distinctive AI shape */
+}
+
+.bubble.user {
+    align-self: flex-end;
+    background: var(--user-bg);
+    color: var(--user-text);
+    border-radius: 24px 24px 4px 24px; /* Distinctive User shape */
+}
+
+.bubble b { 
+    color: inherit; 
+    display: inline; 
+    margin-bottom: 6px; 
+    font-size: 16px; 
+    font-weight: 700;
+}
+
+/* 9. ANIMATIONS & EFFECTS */
+@keyframes startPulse {
+    0% { box-shadow: 0 0 0 0px rgba(52, 168, 83, 0.445); }
+    100% { box-shadow: 0 0 0 20px rgba(50, 158, 79, 0); }
+}
+.node.pulse { animation: startPulse 2s infinite; background: #f6fef8 !important; }
+
+/* Replaced neon glow with a smooth gradient shadow for processing */
+@keyframes geminiProcess {
+    0% { box-shadow: 0 4px 15px rgba(26, 115, 232, 0.1); transform: translateY(0); }
+    100% { box-shadow: 0 8px 25px rgba(179, 40, 211, 0.2); transform: translateY(-2px); }
+}
+.processing { animation: geminiProcess 1s infinite alternate !important; border-color: #a348e3 !important;}
+
+.blinking-text {
+    display: none; position: absolute; top: -40px; right: 20px;
+    color: var(--text-secondary); font-size: 14px; font-weight: 500;
+    animation: blinker 1.5s ease-in-out infinite;
+}
+.blinking-text.active { display: block; }
+@keyframes blinker { 50% { opacity: 0.4; } }
+
+/* SVG LAYER */
+svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+path { fill: none; stroke: #2e3a4953; stroke-width: 1.2; stroke-dasharray: 6; }
+
+.dot { display: none; fill: #1a73e8; filter: drop-shadow(0 0 4px rgba(26, 115, 232, 0.914)); }
+.dot.active { display: block; }
+
+/* 10. NODE LOADERS */
+.loader {
+    display: none; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+    width: 24px; aspect-ratio: 2;
+    --_g: no-repeat radial-gradient(circle closest-side, rgba(0, 0, 0, 0.4) 90%, #0000);
+    background: var(--_g) 0% 50%, var(--_g) 50% 50%, var(--_g) 100% 50%;
+    background-size: calc(100%/3) 30%;
+    animation: l3 1s infinite linear;
+}
+
+.processing .loader { display: block; }
+@keyframes l3 {
+    20%{background-position:0% 0%, 50% 50%,100% 50%}
+    40%{background-position:0% 100%, 50% 0%,100% 50%}
+    60%{background-position:0% 50%, 50% 100%,100% 0%}
+    80%{background-position:0% 50%, 50% 50%,100% 100%}
+}
