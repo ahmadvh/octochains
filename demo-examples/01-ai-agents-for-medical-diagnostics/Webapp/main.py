@@ -2,13 +2,14 @@ import os
 import uuid
 import json
 import asyncio
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, PlainTextResponse
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from octochains import Agent, Aggregator, Engine
+import datetime
 
 
 
@@ -111,7 +112,43 @@ async def analyze_report(file: UploadFile = File(...)):
     # Return as a stream
     return StreamingResponse(generate_stream(), media_type="application/x-ndjson")
 
-
+@app.get("/download_log/{session_id}")
+async def download_log(session_id: str):
+    context = session_store.get(session_id)
+    if not context:
+        return JSONResponse({"error": "Session not found"}, status_code=404)
+    
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Format a comprehensive, compliance-ready log file
+    log_content = (
+        "=================================================\n"
+        " OCTOCHAINS AI - EU AI ACT COMPLIANCE TRACE LOG \n"
+        "=================================================\n"
+        f"Session ID: {session_id}\n"
+        f"Timestamp: {timestamp}\n"
+        "Model Environment: Parallel Multi-Agent (LLM)\n"
+        "Status: COMPLETED\n\n"
+        "--- ORIGINAL INPUT DATA ---\n"
+        f"{context.get('original_data', 'N/A')}\n\n"
+        "=================================================\n"
+        " MULTIDISCIPLINARY AGENT TRACES \n"
+        "=================================================\n"
+        f"{context.get('traces', 'N/A')}\n\n"
+        "=================================================\n"
+        " FINAL CONSENSUS REPORT \n"
+        "=================================================\n"
+        f"{context.get('consensus', 'N/A')}\n"
+        "=================================================\n"
+        "End of Trace Log."
+    )
+    
+    # The Content-Disposition header forces the browser to download it as a .txt file
+    headers = {
+        "Content-Disposition": f"attachment; filename=octochains_trace_{session_id}.txt"
+    }
+    
+    return PlainTextResponse(content=log_content, headers=headers)
 @app.post("/chat")
 async def chat_with_team(session_id: str = Form(...), message: str = Form(...)):
     context = session_store.get(session_id)

@@ -9,12 +9,23 @@
 <body>
     <div id="tooltip" class="tooltip"></div>
     <div class="header">
-        <div class="tagline">AI Agents for Medical Diagnostics</div>
+        <div class="brand-container">
+            <img class="header-logo" src="logo/logo.png" alt="Logo">
+            <span class="purple-brand">Octochains</span>
+            <span class="header-divider">|</span>
+            <div class="tagline">AI Agents for Medical Diagnostics</div>
+        </div>
         <div class="reset-hint">Press <span>ESC</span> to Reset</div>
     </div>
 
     <div class="page active">
         <div class="left-panel">
+        
+            <div class="zoom-controls">
+                <button id="zoom-out" title="Zoom Out">−</button>
+                <button id="zoom-in" title="Zoom In">+</button>
+            </div>
+        
             <div class="canvas">
                 <div class="agent-box">
                     <div id="working-text" class="blinking-text">Agents working in parallel...</div>
@@ -54,6 +65,10 @@
                 <circle r="5" class="dot phase2"><animateMotion begin="indefinite" dur="2s" repeatCount="1"><mpath href="#p2-neuro"/></animateMotion></circle>
             </svg>
             </div>
+
+            <div class="disclaimer-card">
+                ⚠️ <b>Disclaimer:</b> Research demo only. Not intended for clinical use, or as a substitute for professional medical advice or diagnosis.
+            </div>
         </div>
 
         <div class="right-panel">
@@ -64,7 +79,13 @@
             </div>
 
             <div id="log-container" class="hidden-slide">
-                <div class="term-head">🤖 CLINICAL ASSISTANT</div>
+                <div class="term-head">
+                    <div class="term-title">🤖 CLINICAL ASSISTANT</div>
+                    <button id="download-log-btn" class="download-btn hidden" title="Download EU AI Act Compliance Log">
+                        <!-- <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> -->
+                        ⬇️ Download Trace Log
+                    </button>
+                </div>
                 <div class="chat-container" id="chat-container"></div>
                 <div class="chat-ui" id="chat-ui">
                     <input type="text" id="chat-input" placeholder="Ask about the diagnosis...">
@@ -73,13 +94,12 @@
             </div>
         </div>
     </div>
-
+<!-- 
     <div class="footer-brand">
-        <!-- <span class="made-by">made by</span> -->
          <img class="footer-logo" src="logo/logo.png" alt="Logo">
         <span class="purple-brand">OCTOCHAINS</span>
         
-    </div>
+    </div> -->
 
     <script src="app.js"></script>
 </body>

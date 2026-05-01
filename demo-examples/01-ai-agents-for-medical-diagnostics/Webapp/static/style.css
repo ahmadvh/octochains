@@ -9,8 +9,12 @@
     --user-text: #041e49;
     --team-bg: #f0f4f9;
     --team-text: #1f1f1f;
-    
-    --gemini-gradient: linear-gradient(90deg, #1a73e8, #b328d3, #ea4335);
+    --purple-brand: #5b247a;
+    --blue-brand: #1bcedf;
+    --green-brand: #34a853;
+
+
+    --brand-gradient: linear-gradient(90deg, var(--purple-brand), var(--blue-brand));
     --header-height: 64px;
 }
 
@@ -89,7 +93,7 @@ body {
     font-size: 20px;
     font-weight: 500;
     letter-spacing: -0.5px;
-    background: var(--gemini-gradient);
+    background: var(--brand-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -124,7 +128,7 @@ body {
 }
 
 .purple-brand {
-    background: var(--gemini-gradient);
+    background: var(--brand-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 700;
@@ -172,6 +176,7 @@ body {
     height: 500px;
     transform: scale(1.1);
     transform-origin: center center;
+    transition: transform 0.3s ease; /* Added for smooth scaling */
 }
 
 .node {
@@ -248,7 +253,6 @@ body {
     opacity: 1;
     transform: translateX(0);
 }
-
 .term-head {
     padding: 20px 24px;
     font-weight: 500;
@@ -257,11 +261,43 @@ body {
     font-size: 16px;
     display: flex;
     align-items: center;
+    justify-content: space-between; /* Pushes title left, button right */
+}
+
+.term-title {
+    display: flex;
+    align-items: center;
     gap: 8px;
 }
 
-.term-head::before {
+.term-title::before {
     content: "✨";
+}
+
+.download-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-main);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.download-btn:hover {
+    background: #e3e3e3; /* Slightly darker grey on hover */
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.download-btn.hidden {
+    display: none;
 }
 
 .chat-container {
@@ -430,4 +466,181 @@ path { fill: none; stroke: #2e3a4953; stroke-width: 1.2; stroke-dasharray: 6; }
     40%{background-position:0% 100%, 50% 0%,100% 50%}
     60%{background-position:0% 50%, 50% 100%,100% 0%}
     80%{background-position:0% 50%, 50% 50%,100% 100%}
+}
+
+
+/* ==========================================================
+   Responsive Styles
+========================================================== */
+
+@media (max-width: 1100px) {
+    body {
+        overflow-y: auto;
+        height: auto;
+    }
+    .page {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    .left-panel {
+        flex: none;
+        width: 100%;
+        height: 500px;
+    }
+    .right-panel {
+        flex: none;
+        width: 100%;
+        height: 600px;
+        border-top: 1px solid var(--border-light);
+    }
+    .canvas {
+        transform: scale(0.8);
+    }
+    .footer-brand {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        margin: 30px auto;
+        width: max-content;
+    }
+}
+
+@media (max-width: 850px) {
+    .canvas {
+        transform: scale(0.65);
+    }
+    .left-panel {
+        height: 400px;
+    }
+}
+
+@media (max-width: 600px) {
+    .header {
+        padding: 0 15px;
+    }
+    .tagline {
+        font-size: 16px;
+    }
+    .reset-hint {
+        font-size: 11px;
+    }
+    .canvas {
+        transform: scale(0.45);
+    }
+    .left-panel {
+        height: 300px;
+    }
+    .right-panel {
+        height: 500px;
+    }
+    .dropzone {
+        margin: 15px;
+        text-align: center;
+    }
+    .dropzone h2 {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 400px) {
+    .canvas {
+        transform: scale(0.35);
+    }
+    .left-panel {
+        height: 240px;
+    }
+}
+
+.zoom-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+}
+
+.zoom-controls button {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+.zoom-controls button:hover {
+    background: var(--bg-main);
+    transform: translateY(-1px);
+}
+
+/* --- Disclaimer Card --- */
+.disclaimer-card {
+    position: absolute;
+    bottom: 10px; /* Sits right above your footer logo */
+    left: 25px;
+    max-width: 320px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+}
+
+.disclaimer-card b {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Responsive adjustments for the disclaimer */
+@media (max-width: 1100px) {
+    .disclaimer-card {
+        bottom: 15px; 
+        left: 15px;
+        max-width: 280px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 600px) {
+    .disclaimer-card {
+        max-width: calc(100% - 30px);
+        bottom: 10px;
+        left: 15px;
+        right: 15px;
+        text-align: left;
+        padding: 10px 14px;
+    }
+}
+.brand-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.header-divider {
+    color: var(--border-light);
+    font-size: 20px;
+    margin: 0 4px;
+    font-weight: 300;
 }

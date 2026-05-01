@@ -13,6 +13,34 @@ window.addEventListener('keydown', e => {
     }
 });
 
+// --- Zoom Controls ---
+const zoomInBtn = document.getElementById('zoom-in');
+const zoomOutBtn = document.getElementById('zoom-out');
+const canvasEl = document.querySelector('.canvas');
+const downloadLogBtn = document.getElementById('download-log-btn');
+// Function to read the current scale from CSS, regardless of media queries
+function getCanvasScale() {
+    const transform = window.getComputedStyle(canvasEl).getPropertyValue('transform');
+    if (transform !== 'none') {
+        const matrix = transform.match(/^matrix\((.+)\)$/);
+        if (matrix) return parseFloat(matrix[1].split(', ')[0]);
+    }
+    return 1;
+}
+
+// Ensure we grab the base scale initially applied by CSS
+let currentScale = getCanvasScale();
+
+zoomInBtn.addEventListener('click', () => {
+    currentScale += 0.1;
+    canvasEl.style.transform = `scale(${currentScale})`;
+});
+
+zoomOutBtn.addEventListener('click', () => {
+    currentScale -= 0.1;
+    canvasEl.style.transform = `scale(${currentScale})`;
+});
+
 function addBubble(text, type = "system") {
     const b = document.createElement('div');
     b.className = `bubble ${type}`;
@@ -26,6 +54,13 @@ function addBubble(text, type = "system") {
     
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
+
+downloadLogBtn.addEventListener('click', () => {
+    if (session) {
+        // Pointing the window location to this endpoint automatically triggers the browser's file download behavior
+        window.location.href = `/download_log/${session}`;
+    }
+});
 
 function setProcessing(selector, isActive) {
     const elements = document.querySelectorAll(selector);
@@ -142,16 +177,12 @@ async function handleFile(file) {
                 // time out of 1 second
                 setTimeout(() => {
                 logCont.classList.add('active'); 
-                addBubble("CONSENSUS REPORT", "system");
+                // addBubble("CONSENSUS REPORT", "system");
                 addBubble(consensusData.consensus, "team");
+                downloadLogBtn.classList.remove('hidden');
+                chatContainer.scrollTop = 0;
                 }, 1000);
 
-
-                
-
-                setTimeout(() => {
-                    chatContainer.scrollTop = 0;
-                }, 50);
 
             }, teamThinkingTime);
 
@@ -184,15 +215,30 @@ document.querySelectorAll('.agent').forEach(node => {
             
             let topPosition = rect.top;
             
+            // Adjust vertical bounds
             if (topPosition + tooltipHeight > windowHeight - 20) {
                 topPosition = windowHeight - tooltipHeight - 20;
             }
-            
             if (topPosition < 20) {
                 topPosition = 20; 
             }
             
-            tooltip.style.left = (rect.right + 20) + 'px';
+            let leftPosition = rect.right + 20;
+            
+            // Responsive logic: Adjust horizontal bounds to prevent screen clipping
+            const tipWidth = tooltip.offsetWidth || 340; // fallback to CSS default if 0
+            if (leftPosition + tipWidth > window.innerWidth - 20) {
+                // Try moving it to the left of the node
+                leftPosition = rect.left - tipWidth - 20;
+                
+                // If it ALSO clips on the left (very small screens), center it
+                if (leftPosition < 10) {
+                    leftPosition = Math.max(10, (window.innerWidth / 2) - (tipWidth / 2));
+                    topPosition = rect.bottom + 15; // move directly beneath the node
+                }
+            }
+            
+            tooltip.style.left = leftPosition + 'px';
             tooltip.style.top = topPosition + 'px';
         }
     });
