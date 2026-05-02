@@ -15,15 +15,18 @@ By broadcasting a single complex problem to a pool of isolated specialists, Octo
 
 ---
 
+<div align="center">
+    <img width="800" height="390" alt="octochains-architecture" src="https://github.com/user-attachments/assets/81c719bd-daab-446c-87af-be33daa50110" />
+</div>
+
 ### The Core Innovation
 
-Even State-of-the-Art models (like GPT-5) can fall into "Reasoning Traps", a form of cognitive tunnel vision where the model commits to a path too early. Octochains eliminates this via a MapReduce-inspired architecture:
+Even State-of-the-Art models can fall into **"Reasoning Traps"**, a form of cognitive tunnel vision where a model commits to a logical path too early. Octochains eliminates this through a MapReduce-inspired architecture designed for multidisciplinary precision and high-stakes transparency:
 
-1.  **Broadcasting**: The full, complex problem is passed directly to every specialized agent in the pool.
-2.  **Parallel Execution**: Agents operate simultaneously in isolated, threaded environments, ensuring they cannot bias each other's initial findings.
-3.  **The Aggregator**: A final "Chief Justice" agent synthesizes these conflicting or supporting insights into a single transparent, explainable, and robust outcome.
-
-<img width="1690" height="931" alt="f" src="https://github.com/user-attachments/assets/b0211d7d-09dc-4a2b-a993-6487ae6475a3" />
+1.  **Broadcasting**: The full, complex problem is passed directly to every specialized agent in the pool, ensuring no context is lost or filtered by a "master" model.
+2.  **Parallel Execution**: Agents operate simultaneously in isolated, threaded environments. This ensures that specialist findings remain unbiased by the opinions of other agents during the initial reasoning phase.
+3.  **Traceability & Compliance**: To meet **EU AI Act** requirements for monitorable AI, Octochains generates comprehensive trace logs for every decision. Every internal thought process, specialist conflict, and evidence-based rationale is logged and downloadable for human audit.
+4.  **The Aggregator**: A final "Chief Justice" agent synthesizes these conflicting or supporting insights into a single transparent, explainable, and robust outcome.
 
 ---
 
