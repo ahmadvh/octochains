@@ -16,8 +16,10 @@ By broadcasting a single complex problem to a pool of isolated specialists, Octo
 ---
 
 <div align="center">
-    <img width="800" height="390" alt="octochains-architecture" src="https://github.com/user-attachments/assets/81c719bd-daab-446c-87af-be33daa50110" />
+<img  width="800" height="410" alt="octochains-architecture" src="https://github.com/user-attachments/assets/25dc20b7-568e-4446-b12c-bd174e83b740" />
+
 </div>
+
 
 ### The Core Innovation
 
