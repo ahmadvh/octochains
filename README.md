@@ -2,7 +2,7 @@
 
 [![GOSIM Spotlight 2026](https://img.shields.io/badge/GOSIM_2026-Top_10_Featured_Project-blueviolet)](https://gosim.org) 
 [![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE.md)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://pypi.org/project/octochains/)
+[![Version](https://img.shields.io/badge/version-0.1.1-blue)](https://pypi.org/project/octochains/)
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" alt="Octochains Logo" width="40%" style="max-width:260px; min-width:150px;"/>
