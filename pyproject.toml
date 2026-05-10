@@ -4,19 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "octochains"
-version = "0.1.0"
-description = "A MapReduce-inspired framework for parallel, isolated multi-agent reasoning."
+version = "0.1.1"
+description = "A framework for parallel, isolated multi-agent reasoning."
 readme = "README.md"
+license = { text = "BSL-1.1" }
 requires-python = ">=3.9"
 authors = [
     { name="Ahmad", email="ahmad.vh7@gmail.com" }
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "License :: Other/Proprietary License",
     "Operating System :: OS Independent",
 ]
-
 
 dependencies = [
     "pydantic>=2.0.0",

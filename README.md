@@ -1,34 +1,39 @@
-# Octochains
+# 🐙 Octochains
 
 [![GOSIM Spotlight 2026](https://img.shields.io/badge/GOSIM_2026-Top_10_Featured_Project-blueviolet)](https://gosim.org) 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://pypi.org/project/octochains/) 
-<img align="right" width="250" alt="Octochains Logo" src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" />
+[![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE.md)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://pypi.org/project/octochains/)
 
-<br>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" alt="Octochains Logo" width="50%" style="max-width:350px; min-width:150px;"/>
+</p>
 
-**Octochains** is a lightweight, zero-dependency Python framework for **Collaborative AI Reasoning**. It moves away from "monolithic" AI responses toward a parallel, multi-expert architecture that eliminates **"Expert Blindspots"** in high-stakes decision-making.
+**Octochains** is a lightweight, zero-dependency Python framework for **Collaborative AI Reasoning**.It is purpose-built for **Decomposable Tasks**, complex problems that require independent, multi-perspective analysis.
 
-By broadcasting a single complex problem to a pool of isolated specialists, Octochains ensures that every angle, from clinical diagnostics to legal compliance, is evaluated independently before reaching a final consensus.
+By shifting from monolithic responses to **Parallel Isolated Reasoning**, Octochains ensures that every angle of a decision, from clinical diagnostics to financial risk, is evaluated in threaded isolation, preventing logical contamination and "Expert Blindspots."
 
-<br>
+## Scientifically Validated Performance
+Octochains is built on the architectural principles validated in the 2026 study **["Towards a Science of Scaling Agent Systems"](https://research.google/blog/towards-a-science-of-scaling-agent-systems-when-and-why-agent-systems-work/)** (Google Research / MIT).
 
----
+Research confirms that for analytical, decomposable tasks, a **Parallel Isolated** architecture (the core of Octochains) delivers a massive performance delta over standard sequential or single-agent models:
+
+| Benchmark | Task Domain | Performance Gain vs. Single-Agent |
+| :--- | :--- | :--- |
+| **Finance-Agent (FAB)** | **Decomposable Financial Reasoning** | **+80.8% 🚀** |
+| **Workbench** | **Structured Business Planning** | **+57.2%** |
+| **PlanCraft** | **Sequential Automation** | *(Use Single-Agent Instead)* |
+
+## Why Octochains?
+
+Standard AI chains suffer from **"Cognitive Tunnel Vision"**, where a model commits to a logical path too early. Octochains eliminates this via:
+
+* **Parallel Isolation:** Expert nodes operate in private threads with zero awareness of peers, preventing "logical contamination."
+* **Centralized Verification:** A specialized "Chief Justice" aggregator synthesizes reports, identifying conflicts and evidence gaps before delivering a verdict.
+* **Audit-First Design:** Every decision generates a 100% traceable log of expert rationale, meeting **EU AI Act** requirements for monitorable AI.
 
 <div align="center">
-<img  width="800" height="410" alt="octochains-architecture" src="https://github.com/user-attachments/assets/25dc20b7-568e-4446-b12c-bd174e83b740" />
-
+<img  width="800px" height="410px" alt="octochains-architecture" src="https://github.com/user-attachments/assets/25dc20b7-568e-4446-b12c-bd174e83b740" />
 </div>
-
-
-### The Core Innovation
-
-Even State-of-the-Art models can fall into **"Reasoning Traps"**, a form of cognitive tunnel vision where a model commits to a logical path too early. Octochains eliminates this through a MapReduce-inspired architecture designed for multidisciplinary precision and high-stakes transparency:
-
-1.  **Broadcasting**: The full, complex problem is passed directly to every specialized agent in the pool, ensuring no context is lost or filtered by a "master" model.
-2.  **Parallel Execution**: Agents operate simultaneously in isolated, threaded environments. This ensures that specialist findings remain unbiased by the opinions of other agents during the initial reasoning phase.
-3.  **Traceability & Compliance**: To meet **EU AI Act** requirements for monitorable AI, Octochains generates comprehensive trace logs for every decision. Every internal thought process, specialist conflict, and evidence-based rationale is logged and downloadable for human audit.
-4.  **The Aggregator**: A final "Chief Justice" agent synthesizes these conflicting or supporting insights into a single transparent, explainable, and robust outcome.
 
 ---
 
@@ -54,7 +59,9 @@ class Specialist(Agent):
 
     @tool
     def check_compliance(self, text: str):
-        """Analyzes text for regulatory non-compliance."""
+        """
+        Analyzes text for regulatory non-compliance.
+        """
         # Framework automatically generates JSON schema for this tool
         return "Compliant"
 
@@ -74,9 +81,9 @@ class ChiefConsensusOfficer(Aggregator):
             goal="Synthesize expert opinions into a final verdict"
         )
 
-    def synthesize(self, problem_data: str, agent_reports: dict[str, str]) -> str:
+    def execute(self, agent_reports: dict[str, str]) -> str:
         """
-        Receives the original problem and a dictionary of reports.
+        Receives the a dictionary of reports.
         Key: Agent Role, Value: Agent output string.
         """
         # Here you can call a high-reasoning LLM to compare the reports
@@ -105,10 +112,10 @@ report = engine.run("Full Project Alpha Investment Case File...")
 print(f"Consensus: {report.consensus}")
 print(f"Audit Trail: {report.traces}")
 ```
----
-### Featured Use Case: Medical Diagnostics
 
-<img width="600" align="center-horizontal" height="300" alt="agentic ai for medica diagnostics" src="https://github.com/user-attachments/assets/c835c6aa-fbd1-42d4-887f-42c4c64071ea" />
+## Featured Use Case: Medical Diagnostics
+
+<img width="600px" align="center-horizontal" height="300px" alt="agentic ai for medica diagnostics" src="https://github.com/user-attachments/assets/c835c6aa-fbd1-42d4-887f-42c4c64071ea" />
 <br>
 
 While Octochains is a universal framework, its power is best demonstrated in multidisciplinary medicine. The featured example simulates a clinical team to rule out underlying heart conditions, psychological factors, or respiratory issues that might be missed by a single-model analysis.
@@ -119,60 +126,25 @@ While Octochains is a universal framework, its power is best demonstrated in mul
 
 ⚠️ **Disclaimer**: This project is for research and educational purposes only and is **not intended for clinical use**.
 
----
+## Architecture & Strategy
+Octochains is designed for high-stakes environments where "vibe-based" AI isn't enough. It excels in **Medical Diagnostics**, **Legal Audits**, and **Strategic Business and Financial Analysis**.
 
-### Repository Structure 
+## Repository Structure
+* `/src/octochains/engine.py`: The high-performance parallel execution engine.
+* `/src/octochains/agents/`: A growing library of specialized experts (Finance, Legal, Medical and etc.).
+* `/src/octochains/aggregators/`: Standardized synthesis logic (Majority Vote, Weighted Consensus, etc.).
 
-**The Agent & Aggregator Hub**
-Octochains is built to be modular. We are developing an Agent & Aggregator Hub where the community can contribute, publish, and reuse specialized reasoning modules.
-```plaintext
-src/octochains/
-├── __init__.py           <-- Core framework exports
-├── base.py               <-- Abstract Base Classes (Agent/Aggregator)
-├── engine.py             <-- Parallel Broadcast Engine
-├── schema.py    
-├── exceptions.py         <-- Error handling     
-│
-├── agents/               <-- THE AGENT HUB
-│   ├── medical/          
-│   │   ├── __init__.py   <-- Export: Cardiologist, Neurologist, etc.
-│   │   ├── cardiology.py
-│   │   └── neurology.py
-│   ├── legal/
-│   │   ├── __init__.py   <-- Export: Compliance, ContractExpert
-│   │   └── compliance.py
-│   └── finance/
-│       ├── __init__.py
-│       └── analyst.py
-│
-└── aggregators/          <-- THE AGGREGATOR LIBRARY
-    ├── medical/
-    │   ├── __init__.py   <-- Export: ChiefMedicalOfficer
-    │   └── cmo.py
-    └── logic/            <-- Standard decision-making logic
-        ├── __init__.py   <-- Export: MajorityVote, WeightedConsensus
-        ├── majority.py
-        └── consensus.py
-```
-**Demo Examples**
-Every demo in Octochains is designed as a standalone, reproducible case study. This ensures the core framework remains lightweight while allowing specific use cases to have their own environment.
-```plaintext
-demo-examples/
-└── 01-ai-agents-for-medical-diagnostics/
-    ├── medical_reports/    <-- Sample patient dossiers
-    ├── results/            <-- Historical audit logs of agent outputs
-    ├── requirements.txt    <-- Isolated dependencies (e.g., biopython)
-    └── run_demo.py         <-- Entry point for the diagnostic engine
-```
+## Future Roadmap
+We are expanding Octochains from a library into a comprehensive ecosystem for high-stakes reasoning:
 
----
+* **OctoNodes UI:** A visual drag-and-drop orchestration tool (inspired by n8n) to build and deploy complex reasoning flows without code.
+* **The Enterprise Node Tier:** Certified, high-reliability reasoning nodes (e.g., "Deep SEC Auditor," "Clinical Verifier") for regulated industries.
 
-### Future Roadmap
-We are expanding Octochains from a library into a comprehensive ecosystem for high-stakes AI reasoning.
+## License
+Octochains is **Fair-code**, distributed under the **Business Source License 1.1**.
 
-- **The Agent Hub:** A community-driven marketplace for pre-tuned specialist modules. Developers can build and publish their own "experts" (e.g., M&A Due Diligence, Cybersecurity Threat Hunter, or Endocrinology Specialist) for others to snap into their own chains.
+* **Individuals & Internal Use:** Free to use for personal projects, research, and internal business workflows.
+* **Commercial Providers:** You **cannot** offer Octochains as a managed SaaS or sell a commercial wrapper of the engine without a license.
+* **The Guarantee:** On **May 10, 2030**, this version automatically becomes **Apache 2.0 (Open Source)**.
 
----
-### License & Contact
-Octochains is open-source under the MIT license. For enterprise features and custom integrations
-contact: ahmad.vh7@gmail.com
+**To access the Enterprise Reasoning Features, contact:** [ahmad.vh7@gmail.com](mailto:ahmad.vh7@gmail.com)

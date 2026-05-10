@@ -58,7 +58,7 @@ class MultidisciplinaryTeam(Aggregator):
         super().__init__(role="MultidisciplinaryTeam", goal="Synthesize reports.")
         self.llm = ChatOpenAI(temperature=0, model=model)
 
-    def synthesize(self, problem_data: str, agent_reports: dict) -> str:
+    def execute(self, agent_reports: dict) -> str:
         prompt = prompts.AGGREGATOR_PROMPT.format(
             cardio=agent_reports.get('Cardiologist', 'N/A'),
             psych=agent_reports.get('Psychologist', 'N/A'),

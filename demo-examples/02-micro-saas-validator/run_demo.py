@@ -3,12 +3,14 @@ from litellm import completion
 from octochains.base import Agent, Aggregator
 from octochains.engine import Engine 
 from dotenv import load_dotenv
+import litellm
+litellm.debug = True
 
 # --- Configuration ---
 # Pointing to your GPU machine running Ollama
 OLLAMA_API_BASE = "http://localhost:11434"
 # Using a small, fast local model (change to phi3, gemma2:2b, or qwen2.5 as needed)
-MODEL_NAME = "ollama/llama3.2:3b"
+MODEL_NAME = "ollama/llama3.2"
 
 def call_ollama(prompt: str) -> str:
     """Helper function to call the local Ollama model via LiteLLM."""
@@ -106,7 +108,7 @@ class VentureCapitalist(Aggregator):
         # Load environment variables once when the Aggregator is initialized
         load_dotenv()
 
-    def synthesize(self, problem_data: str, agent_reports: dict) -> str:
+    def execute(self, agent_reports: dict) -> str:
         print(f"\n[{self.role}] Synthesizing reports and making final decision via OpenAI...\n")
         
         compiled_reports = ""
@@ -114,9 +116,6 @@ class VentureCapitalist(Aggregator):
             compiled_reports += f"--- {agent_name} ---\n{report}\n\n"
 
         prompt = f"""You are a {self.role}. Your goal is to {self.goal}.
-        
-        ORIGINAL IDEA:
-        {problem_data}
         
         EXPERT REPORTS:
         {compiled_reports}

@@ -106,12 +106,18 @@ To keep the Octochains codebase clean and maintainable for everyone, please adhe
 
 ---
 
-### License
-By contributing to Octochains, you agree that your contributions will be licensed under its **MIT License**.
+### Licensing of Contributions
+
+Octochains operates under a **Fair-Code** model. By submitting a contribution to this repository, you agree to the following:
+
+1. **BSL 1.1 Licensing**: You agree that your contributions will be licensed under the **Business Source License 1.1**. This allows the project to remain sustainable while keeping the source code public and free for most users.
+2. **Automatic Open Source Transition**: You acknowledge and agree that your contributions will automatically transition to the **Apache License, Version 2.0**, upon the project's predefined Change Date (the 4-year sunset). 
+
+This structure ensures that while we protect the engine's development today, your work is guaranteed to eventually become part of a fully open-source public good.
 
 ### Questions?
 If you have questions about where a specific expert belongs in the Hub or need help with the threading logic, feel free to [open an Issue](https://github.com/ahmadvh/octochains/issues) or reach out directly to the maintainer:
 
 📩 [ahmad.vh7@gmail.com](mailto:ahmad.vh7@gmail.com)
 
-**Let's build the future of parallel reasoning together!** 🐙✨
+**Let's build the future of parallel reasoning together!** ✨

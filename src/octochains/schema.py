@@ -1,4 +1,3 @@
-# Copyright (c) 2026 Ahmad Varasteh. Licensed under the MIT License.
 from dataclasses import dataclass, field
 from typing import List, Optional, Any
 

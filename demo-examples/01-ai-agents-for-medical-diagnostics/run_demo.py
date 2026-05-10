@@ -86,7 +86,7 @@ class MultidisciplinaryTeam(Aggregator):
         )
         self.llm = ChatOpenAI(temperature=0, model=model)
 
-    def synthesize(self, agent_reports: dict) -> str:
+    def execute(self, agent_reports: dict) -> str:
         # We extract the specific reports from the dictionary passed by the Engine
         prompt = f"""
         Act like a multidisciplinary team of healthcare professionals.

@@ -1,4 +1,13 @@
-# Copyright (c) 2026 Ahmad Varasteh. Licensed under the MIT License.
+# ==============================================================================
+# Copyright (c) 2026 Ahmad Varasteh (octochains). All rights reserved.
+#
+# Licensed under the Business Source License 1.1 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
+#
+# ==============================================================================
 import concurrent.futures
 from typing import List, Dict
 from .base import Agent, Aggregator
@@ -23,14 +32,14 @@ class Engine:
         self.agents = agents
         self.aggregator = aggregator
 
-    def run(self, problem_data: str) -> Report:
+    def run(self, problem_data: str, show_log: bool = False) -> Report:
         """
         Executes the parallel reasoning workflow.
         
         1. Launches all agents simultaneously in separate threads.
         2. Collects raw results (Strings, Dicts, or Pydantic objects).
         3. Formats results into strings for the Aggregator.
-        4. Synthesizes a final report.
+        4. Aggregator generates a final report based on the collected data.
         
         Args:
             problem_data (str): The input case or data to analyze.
@@ -44,11 +53,12 @@ class Engine:
         # ---------------------------------------------------------
         # PHASE 1: Parallel Specialist Analysis
         # ---------------------------------------------------------
-        # We use a ThreadPoolExecutor to ensure all agents start at once.
+        
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Create a map of 'Future' objects to their respective Agents
-            for agent in self.agents:
-                print(f"{agent.role} is executing...")
+            if show_log:
+                for agent in self.agents:
+                    print(f"{agent.role} is executing...")
             
             future_to_agent = {
                 executor.submit(agent.execute, problem_data): agent 
@@ -91,10 +101,9 @@ class Engine:
         # PHASE 2: Aggregated Consensus
         # ---------------------------------------------------------
         try:
-            # Hand the original problem and the stringified agent reports to the Aggregator
-            consensus = self.aggregator.synthesize(problem_data, agent_reports)
+            consensus = self.aggregator.execute(agent_reports)
         except Exception as exc:
-            consensus = f"CRITICAL ERROR: Aggregator failed to synthesize. Details: {str(exc)}"
+            consensus = f"CRITICAL ERROR: Aggregator failed to execute. Details: {str(exc)}"
 
         # Return the final structured Report object
         return Report(consensus=consensus, traces=traces)

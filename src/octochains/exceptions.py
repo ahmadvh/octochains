@@ -1,4 +1,3 @@
-# Copyright (c) 2026 Ahmad Varasteh. Licensed under the MIT License.
 class OctochainsError(Exception):
     """Base exception for all Octochains-related errors."""
     pass

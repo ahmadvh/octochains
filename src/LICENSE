@@ -1,21 +1,44 @@
-MIT License
+# Business Source License 1.1
 
-Copyright (c) 2025 Ahmad Varasteh
+**Parameters**
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+* **Licensor:** Ahmad Varasteh
+* **Software:** Octochains (including the Python Engine and associated core modules)
+* **Change Date:** May 10, 2030
+* **Change License:** Apache License, Version 2.0
+* **Additional Use Grant:** You may use the Software for any non-commercial purpose. You may also use the Software for internal business purposes. However, you may not use the Software to provide a "managed service" or "Software-as-a-Service" where the primary value provided to the end-user is the functionality of Octochains itself.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+---
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+### 1. Grant of License
+
+The Licensor hereby grants you the right to copy, modify, create derivative works from, and redistribute the Software, subject to the terms of this License.
+
+### 2. Effective Date and Change Date
+
+This License is effective as of the date you receive the Software. On the **Change Date** specified above, this License will automatically terminate, and your rights to the Software will thereafter be governed by the **Change License** specified above.
+
+### 3. Use Restrictions
+
+Your use of the Software under this License is limited by the **Additional Use Grant** above. Specifically:
+* **Personal and Research Use:** Permitted and free.
+* **Internal Business Use:** Permitted and free (e.g., using Octochains within your company to optimize internal workflows).
+* **Commercial Service Restriction:** You may not offer Octochains as a hosted platform, API, or service that competes with the Licensor’s official commercial offerings without a separate written agreement.
+
+### 4. Intellectual Property
+
+The Licensor retains all intellectual property rights in the Software. You may not remove or alter any trademark, logo, copyright, or other proprietary notices in or on the Software.
+
+### 5. No Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+## About this License
+
+Octochains uses the **Business Source License (BSL) 1.1** to balance the needs of a thriving open-source community with the sustainability of the project. 
+
+By setting a **Change Date**, we guarantee that every version of Octochains will eventually become fully Open Source (Apache 2.0). This prevents vendor lock-in while allowing the original creators to fund continued development. 
+
+For enterprise-grade support, custom licensing, and more advanced features, please contact: **ahmad.vh7@gmail.com**

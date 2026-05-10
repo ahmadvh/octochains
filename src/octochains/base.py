@@ -1,4 +1,13 @@
-# Copyright (c) 2026 Ahmad Varasteh. Licensed under the MIT License.
+# ==============================================================================
+# Copyright (c) 2026 Ahmad Varasteh (octochains). All rights reserved.
+#
+# Licensed under the Business Source License 1.1 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
+#
+# ==============================================================================
 import inspect
 from abc import ABC, abstractmethod
 from typing import Dict, List, Callable, Any
@@ -26,10 +35,19 @@ class Agent(ABC):
         dict: "object"
     }
 
-    def __init__(self, role: str, goal: str):
+    def __init__(self, role: str, goal: str, input_description: str):
+        """
+        Initializes the Agent.
+        
+        Args:
+            role: The persona of the agent (e.g., "Financial Analyst").
+            goal: The objective of the agent (e.g., "Find compliance risks").
+            input_description: A short description of the expected input format/content 
+                               to help users of the Agent Hub understand how to use it.
+        """
         self.role = role
         self.goal = goal
-
+        self.input_description = input_description
 
     def format_output(self, output: Any) -> str:
         """
@@ -94,27 +112,26 @@ class Agent(ABC):
         return discovered
 
     @abstractmethod
-    def execute(self, problem_data: str) -> Any:
+    def execute(self, input_description: str, problem_data: str) -> Any:
         """
         The core reasoning logic. Implement LLM calls (OpenAI, Ollama, etc.) here.
+        Use `input_description` to guide the model on what to expect in `problem_data`.
         """
-        print(f"{self.role} is executing...")
         pass
-
 
 class Aggregator(ABC):
     """
-    The Superior Parent Class for the Decision Maker (The 'Chief Justice').
-    Synthesizes the parallel outputs into a final consensus.
+    The Superior Parent Class for the Aggregator layer (The 'Chief Justice').
     """
     def __init__(self, role: str, goal: str):
         self.role = role
         self.goal = goal
 
     @abstractmethod
-    def synthesize(self, problem_data: str, agent_reports: Dict[str, str]) -> str:
+    def execute(self, agent_reports: Dict[str, str]) -> str:
         """
-        Takes the original problem and the results from all parallel agents.
+        Takes the results from all parallel agents.
         Returns the final verdict.
+        Implement LLM calls (OpenAI, Ollama, etc.) here. (if needed!)
         """
         pass
