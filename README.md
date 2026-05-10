@@ -1,11 +1,11 @@
-# 🐙 Octochains
+# Octochains
 
 [![GOSIM Spotlight 2026](https://img.shields.io/badge/GOSIM_2026-Top_10_Featured_Project-blueviolet)](https://gosim.org) 
 [![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE.md)
 [![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://pypi.org/project/octochains/)
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" alt="Octochains Logo" width="50%" style="max-width:350px; min-width:150px;"/>
+  <img src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" alt="Octochains Logo" width="30%" style="max-width:200px; min-width:150px;"/>
 </p>
 
 **Octochains** is a lightweight, zero-dependency Python framework for **Collaborative AI Reasoning**.It is purpose-built for **Decomposable Tasks**, complex problems that require independent, multi-perspective analysis.
@@ -31,8 +31,11 @@ Standard AI chains suffer from **"Cognitive Tunnel Vision"**, where a model comm
 * **Centralized Verification:** A specialized "Chief Justice" aggregator synthesizes reports, identifying conflicts and evidence gaps before delivering a verdict.
 * **Audit-First Design:** Every decision generates a 100% traceable log of expert rationale, meeting **EU AI Act** requirements for monitorable AI.
 
+## Octochains Anathomy 
+
 <div align="center">
-<img  width="800px" height="410px" alt="octochains-architecture" src="https://github.com/user-attachments/assets/25dc20b7-568e-4446-b12c-bd174e83b740" />
+  <img width="800px" height="410px" alt="octochains-architecture"  src="https://github.com/user-attachments/assets/74cb3609-4852-4d64-9c17-f4f3094674c7" />
+
 </div>
 
 ---
@@ -113,19 +116,6 @@ print(f"Consensus: {report.consensus}")
 print(f"Audit Trail: {report.traces}")
 ```
 
-## Featured Use Case: Medical Diagnostics
-
-<img width="600px" align="center-horizontal" height="300px" alt="agentic ai for medica diagnostics" src="https://github.com/user-attachments/assets/c835c6aa-fbd1-42d4-887f-42c4c64071ea" />
-<br>
-
-While Octochains is a universal framework, its power is best demonstrated in multidisciplinary medicine. The featured example simulates a clinical team to rule out underlying heart conditions, psychological factors, or respiratory issues that might be missed by a single-model analysis.
-
-- **Cardiologist Agent**: Focuses on arrhythmias and structural abnormalities.
-- **Psychologist Agent**: Identifies conditions like anxiety or panic disorders.
-- **Pulmonologist Agent**: Assesses respiratory causes such as asthma or COPD.
-
-⚠️ **Disclaimer**: This project is for research and educational purposes only and is **not intended for clinical use**.
-
 ## Architecture & Strategy
 Octochains is designed for high-stakes environments where "vibe-based" AI isn't enough. It excels in **Medical Diagnostics**, **Legal Audits**, and **Strategic Business and Financial Analysis**.
 
@@ -137,8 +127,7 @@ Octochains is designed for high-stakes environments where "vibe-based" AI isn't 
 ## Future Roadmap
 We are expanding Octochains from a library into a comprehensive ecosystem for high-stakes reasoning:
 
-* **OctoNodes UI:** A visual drag-and-drop orchestration tool (inspired by n8n) to build and deploy complex reasoning flows without code.
-* **The Enterprise Node Tier:** Certified, high-reliability reasoning nodes (e.g., "Deep SEC Auditor," "Clinical Verifier") for regulated industries.
+* Community-driven marketplace for pre-tuned specialists Agents.
 
 ## License
 Octochains is **Fair-code**, distributed under the **Business Source License 1.1**.
