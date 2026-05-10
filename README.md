@@ -5,7 +5,7 @@
 [![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://pypi.org/project/octochains/)
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" alt="Octochains Logo" width="30%" style="max-width:200px; min-width:150px;"/>
+  <img src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" alt="Octochains Logo" width="40%" style="max-width:260px; min-width:150px;"/>
 </p>
 
 **Octochains** is a lightweight, zero-dependency Python framework for **Collaborative AI Reasoning**.It is purpose-built for **Decomposable Tasks**, complex problems that require independent, multi-perspective analysis.
@@ -34,7 +34,7 @@ Standard AI chains suffer from **"Cognitive Tunnel Vision"**, where a model comm
 ## Octochains Anathomy 
 
 <div align="center">
-  <img width="800px" height="410px" alt="octochains-architecture"  src="https://github.com/user-attachments/assets/74cb3609-4852-4d64-9c17-f4f3094674c7" />
+  <img width="100%" alt="octochains-architecture"  src="https://github.com/user-attachments/assets/74cb3609-4852-4d64-9c17-f4f3094674c7" />
 
 </div>
 
