@@ -27,28 +27,28 @@ session_store = {}
 # --- AGENTS ---
 class Cardiologist(Agent):
     def __init__(self, model="gpt-4o"):
-        super().__init__(role="Cardiologist", goal="Identify arrhythmias or structural heart issues.")
+        super().__init__(role="Cardiologist", goal="Identify arrhythmias or structural heart issues." , input_description="Medical Report")
         self.llm = ChatOpenAI(temperature=0, model=model)
     def execute(self, medical_report: str) -> str:
         return self.llm.invoke(prompts.CARDIOLOGIST_PROMPT.format(medical_report=medical_report)).content
 
 class Psychologist(Agent):
     def __init__(self, model="gpt-4o"):
-        super().__init__(role="Psychologist", goal="Identify mental health issues.")
+        super().__init__(role="Psychologist", goal="Identify mental health issues.", input_description="Medical Report")
         self.llm = ChatOpenAI(temperature=0, model=model)
     def execute(self, medical_report: str) -> str:
         return self.llm.invoke(prompts.PSYCHOLOGIST_PROMPT.format(medical_report=medical_report)).content
 
 class Pulmonologist(Agent):
     def __init__(self, model="gpt-4o"):
-        super().__init__(role="Pulmonologist", goal="Identify respiratory issues.")
+        super().__init__(role="Pulmonologist", goal="Identify respiratory issues.", input_description="Medical Report")
         self.llm = ChatOpenAI(temperature=0, model=model)
     def execute(self, medical_report: str) -> str:
         return self.llm.invoke(prompts.PULMONOLOGIST_PROMPT.format(medical_report=medical_report)).content
 
 class Neurologist(Agent):
     def __init__(self, model="gpt-4o"):
-        super().__init__(role="Neurologist", goal="Identify neurological issues.")
+        super().__init__(role="Neurologist", goal="Identify neurological issues.", input_description="Medical Report")
         self.llm = ChatOpenAI(temperature=0, model=model)
     def execute(self, medical_report: str) -> str:
         return self.llm.invoke(prompts.NEUROLOGIST_PROMPT.format(medical_report=medical_report)).content
@@ -57,7 +57,7 @@ class MultidisciplinaryTeam(Aggregator):
     def __init__(self, model="gpt-4o"):
         super().__init__(role="MultidisciplinaryTeam", goal="Synthesize reports.")
         self.llm = ChatOpenAI(temperature=0, model=model)
-
+        
     def execute(self, agent_reports: dict) -> str:
         prompt = prompts.AGGREGATOR_PROMPT.format(
             cardio=agent_reports.get('Cardiologist', 'N/A'),
@@ -98,7 +98,7 @@ async def analyze_report(file: UploadFile = File(...)):
         # Once all agents are done, run the aggregator
         aggregator = MultidisciplinaryTeam()
         loop = asyncio.get_event_loop()
-        consensus = await loop.run_in_executor(None, aggregator.synthesize, patient_data, agent_reports)
+        consensus = await loop.run_in_executor(None, aggregator.execute, agent_reports)
         
         # Save session context
         traces_text = "\n\n".join([f"--- {role} ---\n{res}" for role, res in agent_reports.items()])

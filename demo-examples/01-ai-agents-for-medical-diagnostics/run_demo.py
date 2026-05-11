@@ -15,13 +15,14 @@ class Cardiologist(Agent):
     def __init__(self, model="gpt-4o"):
         super().__init__(
             role="Cardiologist",
-            goal="Identify subtle signs of arrhythmias or structural heart issues."
+            goal="Identify subtle signs of arrhythmias or structural heart issues.",
+            input_description="medical report of a patient"
         )
         self.llm = ChatOpenAI(temperature=0, model=model)
 
     def execute(self, medical_report: str) -> str:
         prompt = f"""
-        Act like a cardiologist. You will receive a medical report of a patient.
+        Act like a cardiologist. You will receive a {self.input_description}.
         Task: Review the patient's cardiac workup, including ECG, blood tests, Holter monitor results, and echocardiogram.
         Focus: Determine if there are any subtle signs of cardiac issues that could explain the patient’s symptoms. Rule out any underlying heart conditions.
         Recommendation: Provide guidance on any further cardiac testing or monitoring needed.
@@ -36,13 +37,14 @@ class Psychologist(Agent):
     def __init__(self, model="gpt-4o"):
         super().__init__(
             role="Psychologist",
-            goal="Identify mental health issues such as anxiety, depression, or trauma."
+            goal="Identify mental health issues such as anxiety, depression, or trauma.",
+            input_description="medical report of a patient"
         )
         self.llm = ChatOpenAI(temperature=0, model=model)
 
     def execute(self, medical_report: str) -> str:
         prompt = f"""
-        Act like a psychologist. You will receive a patient's report.
+        Act like a psychologist. You will receive a {self.input_description}.
         Task: Review the patient's report and provide a psychological assessment.
         Focus: Identify any potential mental health issues that may be affecting the patient's well-being.
         Recommendation: Offer guidance on how to address these concerns, including therapy or counseling.
@@ -57,13 +59,14 @@ class Pulmonologist(Agent):
     def __init__(self, model="gpt-4o"):
         super().__init__(
             role="Pulmonologist",
-            goal="Identify respiratory issues such as asthma, COPD, or lung infections."
+            goal="Identify respiratory issues such as asthma, COPD, or lung infections.",
+            input_description="medical report of a patient"
         )
         self.llm = ChatOpenAI(temperature=0, model=model)
 
     def execute(self, medical_report: str) -> str:
         prompt = f"""
-        Act like a pulmonologist. You will receive a patient's report.
+        Act like a pulmonologist. You will receive a {self.input_description}.
         Task: Review the patient's report and provide a pulmonary assessment.
         Focus: Identify any potential respiratory issues affecting the patient's breathing.
         Recommendation: Offer guidance on pulmonary function tests or imaging studies.
@@ -124,12 +127,15 @@ if __name__ == "__main__":
     print("🩺 Octochains: Running Multidisciplinary Diagnostic...")
     
     # This runs the 3 specialists in parallel!
-    report = engine.run(patient_data)
+    report = engine.run(patient_data, show_log = True)
 
     print("\n" + "="*60)
     print("FINAL CONSENSUS DIAGNOSIS")
     print("="*60)
     print(report.consensus)
+
+    # create the folder 
+    os.makedirs("demo-examples/01-ai-agents-for-medical-diagnostics/results", exist_ok=True)
 
     # store in the Rsults folder
     with open("demo-examples/01-ai-agents-for-medical-diagnostics/results/Final Report.txt", "w") as f:

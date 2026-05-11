@@ -29,12 +29,13 @@ class TechLead(Agent):
     def __init__(self):
         super().__init__(
             role="Tech Lead", 
-            goal="Assess the technical feasibility of the idea and suggest the most efficient technology stack."
+            goal="Assess the technical feasibility of the idea and suggest the most efficient technology stack.",
+            input_description="Micro-SaaS idea description"
         )
 
     def execute(self, problem_data: str) -> str:
         prompt = f"""You are a {self.role}. Your goal is to {self.goal}.
-        Analyze the following Micro-SaaS idea and provide:
+        Analyze the following {self.input_description} and provide:
         1. Technical feasibility score (1-10)
         2. Recommended Tech Stack
         3. Biggest technical hurdle.
@@ -47,7 +48,8 @@ class MarketingGuru(Agent):
     def __init__(self):
         super().__init__(
             role="Marketing Guru", 
-            goal="Identify the target audience, the 'hook', and user acquisition channels."
+            goal="Identify the target audience, the 'hook', and user acquisition channels.",
+            input_description="Micro-SaaS idea description"
         )
 
     def execute(self, problem_data: str) -> str:
@@ -65,7 +67,8 @@ class RiskOfficer(Agent):
     def __init__(self):
         super().__init__(
             role="Cynic / Risk Officer", 
-            goal="Find every reason why this idea will fail, focusing on market competition and user churn."
+            goal="Find every reason why this idea will fail, focusing on market competition and user churn.",
+            input_description="Micro-SaaS idea description"
         )
 
     def execute(self, problem_data: str) -> str:
@@ -83,7 +86,8 @@ class PricingSpecialist(Agent):
     def __init__(self):
         super().__init__(
             role="Pricing Specialist", 
-            goal="Determine the optimal monetization strategy and pricing tiers."
+            goal="Determine the optimal monetization strategy and pricing tiers.",
+            input_description="Micro-SaaS idea description"
         )
 
     def execute(self, problem_data: str) -> str:
