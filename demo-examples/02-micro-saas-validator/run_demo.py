@@ -4,12 +4,17 @@ from octochains.base import Agent, Aggregator
 from octochains.engine import Engine 
 from dotenv import load_dotenv
 import litellm
-litellm.debug = True
+
+# Optional: Set to False if you don't want LiteLLM cluttering the terminal
+litellm.debug = False
+
+# Load environment variables (for OpenAI)
+load_dotenv()
 
 # --- Configuration ---
 # Pointing to your GPU machine running Ollama
 OLLAMA_API_BASE = "http://localhost:11434"
-# Using a small, fast local model (change to phi3, gemma2:2b, or qwen2.5 as needed)
+# Using a small, fast local model
 MODEL_NAME = "ollama/llama3.2"
 
 def call_ollama(prompt: str) -> str:
@@ -18,106 +23,96 @@ def call_ollama(prompt: str) -> str:
         model=MODEL_NAME,
         messages=[{"role": "user", "content": prompt}],
         api_base=OLLAMA_API_BASE,
-        # Optional: Adjust temperature. Low for technical/cynic, slightly higher for marketing
         temperature=0.4 
     )
     return response.choices[0].message.content
 
-# --- 1. Define the Agents ---
+def call_openai(prompt: str) -> str:
+    """Helper function to call OpenAI via LiteLLM for the Aggregator."""
+    response = completion(
+        model="gpt-4o", 
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3  
+    )
+    return response.choices[0].message.content
+
+# =====================================================================
+# 1. Define the Agents
+# =====================================================================
 
 class TechLead(Agent):
     def __init__(self):
         super().__init__(
             role="Tech Lead", 
             goal="Assess the technical feasibility of the idea and suggest the most efficient technology stack.",
-            input_description="Micro-SaaS idea description"
+            input_description="Micro-SaaS idea description. You MUST provide: 1. Technical feasibility score (1-10) 2. Recommended Tech Stack 3. Biggest technical hurdle.",
+            llm_callable=call_openai
         )
 
     def execute(self, problem_data: str) -> str:
-        prompt = f"""You are a {self.role}. Your goal is to {self.goal}.
-        Analyze the following {self.input_description} and provide:
-        1. Technical feasibility score (1-10)
-        2. Recommended Tech Stack
-        3. Biggest technical hurdle.
-        
-        Idea: {problem_data}"""
-        
-        return call_ollama(prompt)
+        prompt = self._build_prompt(problem_data)
+        return self.llm_callable(prompt)
+
 
 class MarketingGuru(Agent):
     def __init__(self):
         super().__init__(
             role="Marketing Guru", 
             goal="Identify the target audience, the 'hook', and user acquisition channels.",
-            input_description="Micro-SaaS idea description"
+            input_description="Micro-SaaS idea description. You MUST provide: 1. Target Audience Persona 2. The primary marketing 'hook' 3. Top 2 cheap user acquisition channels.",
+            llm_callable=call_openai
         )
 
     def execute(self, problem_data: str) -> str:
-        prompt = f"""You are a {self.role}. Your goal is to {self.goal}.
-        Analyze the following Micro-SaaS idea and provide:
-        1. Target Audience Persona
-        2. The primary marketing 'hook' or value proposition.
-        3. Top 2 cheap user acquisition channels.
-        
-        Idea: {problem_data}"""
-        
-        return call_ollama(prompt)
+        prompt = self._build_prompt(problem_data)
+        return self.llm_callable(prompt)
+
 
 class RiskOfficer(Agent):
     def __init__(self):
         super().__init__(
             role="Cynic / Risk Officer", 
             goal="Find every reason why this idea will fail, focusing on market competition and user churn.",
-            input_description="Micro-SaaS idea description"
+            input_description="Micro-SaaS idea description. You MUST provide: 1. Why this will fail (be brutal) 2. Hidden competitors 3. Why users will churn after week 1.",
+            llm_callable=call_ollama
         )
 
     def execute(self, problem_data: str) -> str:
-        prompt = f"""You are a {self.role}. Your goal is to {self.goal}.
-        Analyze the following Micro-SaaS idea and provide:
-        1. Why this will fail (be brutal).
-        2. Hidden competitors (who is already doing this for free?).
-        3. Why users will churn after week 1.
-        
-        Idea: {problem_data}"""
-        
-        return call_ollama(prompt)
+        prompt = self._build_prompt(problem_data)
+        return self.llm_callable(prompt)
+
 
 class PricingSpecialist(Agent):
     def __init__(self):
         super().__init__(
             role="Pricing Specialist", 
             goal="Determine the optimal monetization strategy and pricing tiers.",
-            input_description="Micro-SaaS idea description"
+            input_description="Micro-SaaS idea description. You MUST provide: 1. Best pricing model 2. Suggested price points 3. How to justify the price to early adopters.",
+            llm_callable=call_openai
         )
 
     def execute(self, problem_data: str) -> str:
-        prompt = f"""You are a {self.role}. Your goal is to {self.goal}.
-        Analyze the following Micro-SaaS idea and provide:
-        1. Best pricing model (Freemium, One-time, Subscription?)
-        2. Suggested price points.
-        3. How to justify the price to early adopters.
-        
-        Idea: {problem_data}"""
-        
-        return call_ollama(prompt)
+        prompt = self._build_prompt(problem_data)
+        return self.llm_callable(prompt)
 
-# --- 2. Define the Aggregator ---
+
+# =====================================================================
+# 2. Define the Aggregator
+# =====================================================================
 
 class VentureCapitalist(Aggregator):
     def __init__(self):
         super().__init__(
             role="Venture Capitalist", 
-            goal="Decide if the idea is worth building based on the expert reports."
+            goal="Decide if the idea is worth building based on the expert reports.",
+            llm_callable=call_openai
         )
-        # Load environment variables once when the Aggregator is initialized
-        load_dotenv()
 
     def execute(self, agent_reports: dict) -> str:
         print(f"\n[{self.role}] Synthesizing reports and making final decision via OpenAI...\n")
         
-        compiled_reports = ""
-        for agent_name, report in agent_reports.items():
-            compiled_reports += f"--- {agent_name} ---\n{report}\n\n"
+        # Use the built-in formatter from the parent class
+        compiled_reports = self._format_reports(agent_reports)
 
         prompt = f"""You are a {self.role}. Your goal is to {self.goal}.
         
@@ -131,17 +126,12 @@ class VentureCapitalist(Aggregator):
         4. Final pivot or adjustment recommendation to make it succeed.
         """
         
-        # Directly call OpenAI using LiteLLM
-        # It will automatically pick up your OPENAI_API_KEY from the environment
-        response = completion(
-            model="gpt-4o", 
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3  
-        )
-        
-        return response.choices[0].message.content
+        return self.llm_callable(prompt)
 
 
+# =====================================================================
+# 3. Run the Engine
+# =====================================================================
 
 if __name__ == "__main__":
     # The Micro-SaaS Idea Input
@@ -193,7 +183,8 @@ if __name__ == "__main__":
     with open(final_file_path, "w", encoding="utf-8") as f:
         f.write("🚀 FINAL VENTURE CAPITALIST VERDICT\n")
         f.write("="*50 + "\n")
-        f.write(final_verdict)
+        f.write(str(final_verdict))
+        
         print("🚀 FINAL VENTURE CAPITALIST VERDICT\n")
         print("="*50 + "\n")
         print(final_verdict)

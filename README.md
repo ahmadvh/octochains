@@ -2,7 +2,7 @@
 
 [![GOSIM Spotlight 2026](https://img.shields.io/badge/GOSIM_2026-Top_10_Featured_Project-blueviolet)](https://gosim.org) 
 [![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE.md)
-[![Version](https://img.shields.io/badge/version-0.1.1-blue)](https://pypi.org/project/octochains/)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue)](https://pypi.org/project/octochains/)
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" alt="Octochains Logo" width="40%" style="max-width:260px; min-width:150px;"/>
@@ -49,7 +49,23 @@ Octochains is designed to be developer-first and model-agnostic.
 pip install octochains
 ```
 
-### 2. Define an Agent
+### 2. Bring Your Own LLM (Zero-Dependency)
+Octochains requires an `LLMCallable`: a standard Python function that takes a `prompt: str` and returns an output (string, dictionary, or object).
+
+```python
+import openai
+
+client = openai.Client(api_key="sk-...")
+
+def my_llm(prompt: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.3
+    )
+    return response.choices[0].message.content
+```
+### 3. Define Agent
 ```python
 from octochains import Agent, tool
 
@@ -57,7 +73,9 @@ class Specialist(Agent):
     def __init__(self):
         super().__init__(
             role="Legal Expert", 
-            goal="Identify liability risks"
+            goal="Identify liability risks",
+            input_description="A business proposal document.",
+            llm_callable=my_llm
         )
 
     @tool
@@ -69,43 +87,53 @@ class Specialist(Agent):
         return "Compliant"
 
     def execute(self, data: str) -> str:
-        # Use any LLM here (OpenAI, Gemini, Ollama, etc.)
-        # The 'data' passed here is the full complex problem.
-        return f"Legal Analysis: {data}"
+        # Base class automatically handles the double-blind isolation prompt
+        # and dynamically injects your @tool schemas!
+        prompt = self._build_prompt(data)
+        return self.llm_callable(prompt)
 ```
-### 3. Define an Aggregator
+
+### 4. Define an Aggregator
 ```python
 from octochains import Aggregator
+from typing import Any
 
 class ChiefConsensusOfficer(Aggregator):
     def __init__(self):
         super().__init__(
             role="Chief Aggregator",
-            goal="Synthesize expert opinions into a final verdict"
+            goal="Synthesize expert opinions into a final verdict",
+            llm_callable=my_llm
         )
 
-    def execute(self, agent_reports: dict[str, str]) -> str:
+    def execute(self, agent_reports: dict[str, str]) -> Any:
         """
-        Receives the a dictionary of reports.
+        Receives a dictionary of reports.
         Key: Agent Role, Value: Agent output string.
+        Can return a string, or natively return a structured JSON/Pydantic object!
         """
-        # Here you can call a high-reasoning LLM to compare the reports
-        # or implement custom logic to resolve conflicts.
-        verdict = "APPROVED"
-        for role, report in agent_reports.items():
-            if "RISK" in report.upper():
-                verdict = "REJECTED"
+        # Helper method cleanly formats the raw dictionary
+        compiled_reports = self._format_reports(agent_reports)
         
-        return f"Final Decision: {verdict} based on {len(agent_reports)} expert inputs."
+        prompt = f"""
+        Role: {self.role}
+        Goal: {self.goal}
+        Reports:{compiled_reports}
+        FINAL VERDICT:
+        """
+        return self.llm_callable(prompt)
 ```
-
-### 4. Run the Parallel Engine
+### 5. Run the Parallel Engine
 ```python
 from octochains import Engine
 
 # Initialize your experts and the aggregator
+legal_expert = Specialist()
+# finance_expert = FinanceSpecialist()
+# tech_expert = TechSpecialist()
+
 engine = Engine(
-    agents=[legal_expert, finance_expert, tech_expert], 
+    agents=[legal_expert], # Add as many agents as you need
     aggregator=ChiefConsensusOfficer()
 )
 

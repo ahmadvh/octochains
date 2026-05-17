@@ -17,7 +17,7 @@ class Report:
     """
     The final output of the Octochains Engine.
     """
-    consensus: str  # The final verdict from the Aggregator
+    consensus: Any  # The final verdict from the Aggregator
     traces: List[Trace] = field(default_factory=list) # The list of all agent outputs
 
     def __repr__(self):

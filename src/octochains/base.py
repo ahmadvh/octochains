@@ -10,20 +10,26 @@
 # ==============================================================================
 import inspect
 from abc import ABC, abstractmethod
-from typing import Dict, List, Callable, Any
+from typing import Dict, List, Callable, Any, Optional
+
+# Define the custom type alias for the framework
+# The callable takes a string prompt, but can return anything (String, Dict, Object)
+LLMCallable = Callable[[str], Any]
 
 def tool(func: Callable):
     """
     A decorator to mark an Agent's method as a tool.
-    It marks the function so the Agent can 'discover' it later.
+    It marks the function so the Agent can 'discover' it dynamically.
     """
     func._is_octochain_tool = True
     return func
 
+
 class Agent(ABC):
     """
     The Superior Parent Class for all specialized parallel workers.
-    Enforces 'Forced Perspective' and provides automatic tool discovery.
+    Enforces 'Forced Perspective', provides dynamic tool injection, 
+    and handles boilerplate prompt generation.
     """
     # Maps Python type hints to JSON Schema types for universal LLM compatibility
     TYPE_MAP = {
@@ -35,50 +41,82 @@ class Agent(ABC):
         dict: "object"
     }
 
-    def __init__(self, role: str, goal: str, input_description: str):
+    def __init__(self, 
+                 role: str, 
+                 goal: str, 
+                 input_description: str,
+                 llm_callable: Optional[LLMCallable] = None):
         """
         Initializes the Agent.
         
         Args:
-            role: The persona of the agent (e.g., "Financial Analyst").
-            goal: The objective of the agent (e.g., "Find compliance risks").
-            input_description: A short description of the expected input format/content 
-                               to help users of the Agent Hub understand how to use it.
+            role: The specific persona (e.g., "Senior Financial Analyst").
+            goal: What this agent is trying to achieve.
+            input_description: A short description of the input data. 
+            llm_callable: A model-agnostic execution function. 
+                          It MUST accept a single argument (prompt: str).
+                          It can return a raw string or a structured object.
         """
         self.role = role
         self.goal = goal
         self.input_description = input_description
+        self.llm_callable = llm_callable
 
-    def format_output(self, output: Any) -> str:
+    def _build_prompt(self, problem_data: str) -> str:
         """
-        Ensures that whatever the agent returns is converted 
-        into a string for the Aggregator to read.
+        The "Sensible Default" prompt builder.
+        Automatically constructs a highly structured, strict prompt.
+        If any @tool methods exist, it dynamically injects their schemas here.
         """
-        if isinstance(output, str):
-            return output
+        prompt = f"""
+            You are operating in a highly restricted, isolated environment.
+            You have NO knowledge of what other agents are doing. Do not assume anything outside your domain.
+
+            === YOUR IDENTITY ===
+            Role: {self.role}
+            Goal: {self.goal}
+
+            === YOUR TASK ===
+            Data Description: {self.input_description}
+            """
         
-        # If it's a Pydantic model, convert to JSON
-        if hasattr(output, "model_dump_json"):
-            return output.model_dump_json(indent=2)
-            
-        # If it's a dict or list, convert to string
-        import json
-        try:
-            return json.dumps(output, indent=2)
-        except:
-            return str(output)
+        # DYNAMIC TOOL INJECTION
+        tools = self._discover_tools()
+        if tools:
+            prompt += "\n=== AVAILABLE TOOLS ===\n"
+            prompt += "You have access to the following tools. If you need to use a tool, output your request in JSON format.\n"
+            for t in tools:
+                prompt += f"- Tool Name: {t['name']}\n  Description: {t['description']}\n  Parameters: {t['parameters']}\n"
+
+        prompt += f"""
+                === RAW PROBLEM DATA ===
+                {problem_data}
+
+                CRITICAL INSTRUCTIONS:
+                Answer strictly from the perspective of your Role. 
+                Do not provide a generic summary. Provide actionable, specialized insights based on the data above.
+
+                YOUR SPECIALIZED REPORT:
+                """
         
-    
-    @property
-    def tools(self) -> List[Dict[str, Any]]:
+        return prompt
+
+    def format_output(self, raw_result: Any) -> str:
         """
-        The Discovery Engine.
-        Automatically finds all @tool decorated methods and builds a 
-        universal JSON schema for tool-calling LLMs (OpenAI, Gemini, etc).
+        Ensures the engine always gets a string representation of the output
+        in Phase 1, preventing crashes if an object is returned.
+        """
+        if isinstance(raw_result, str):
+            return raw_result
+        return str(raw_result)
+
+    def _discover_tools(self) -> List[Dict[str, Any]]:
+        """
+        Discovers and formats tools marked with the @tool decorator.
         """
         discovered = []
         for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
-            if getattr(method, "_is_octochain_tool", False):
+            if getattr(method, '_is_octochain_tool', False):
                 sig = inspect.signature(method)
                 doc = inspect.getdoc(method) or "No description provided."
                 
@@ -87,12 +125,11 @@ class Agent(ABC):
                     "properties": {},
                     "required": []
                 }
-
+                
                 for param_name, param in sig.parameters.items():
-                    if param_name == "self":
+                    if param_name == 'self':
                         continue
-                    
-                    # Determine the JSON type based on the Python type hint
+                        
                     json_type = self.TYPE_MAP.get(param.annotation, "string")
                     
                     parameters["properties"][param_name] = {
@@ -100,7 +137,6 @@ class Agent(ABC):
                         "description": f"Input for {param_name}"
                     }
                     
-                    # If there's no default value, it's required
                     if param.default is inspect.Parameter.empty:
                         parameters["required"].append(param_name)
 
@@ -112,26 +148,53 @@ class Agent(ABC):
         return discovered
 
     @abstractmethod
-    def execute(self, input_description: str, problem_data: str) -> Any:
+    def execute(self, problem_data: str) -> Any:
         """
-        The core reasoning logic. Implement LLM calls (OpenAI, Ollama, etc.) here.
-        Use `input_description` to guide the model on what to expect in `problem_data`.
+        The core reasoning logic.
+        Use `self._build_prompt(problem_data)` to get your strict isolated prompt,
+        or completely ignore it and write your own custom prompt if using advanced techniques.
+        Execute it using `self.llm_callable(prompt)`.
         """
         pass
+
 
 class Aggregator(ABC):
     """
     The Superior Parent Class for the Aggregator layer (The 'Chief Justice').
     """
-    def __init__(self, role: str, goal: str):
+    def __init__(self, 
+                 role: str, 
+                 goal: str,
+                 llm_callable: Optional[LLMCallable] = None):
+        """
+        Initializes the Aggregator.
+        
+        Args:
+            role: The persona of the aggregator.
+            goal: The overarching objective of the aggregation step.
+            llm_callable: A model-agnostic execution function. 
+                          It MUST accept a single argument (prompt: str).
+                          It can return a raw string, a parsed dictionary, 
+                          or a structured object (like a Pydantic model).
+        """
         self.role = role
         self.goal = goal
+        self.llm_callable = llm_callable
+
+    def _format_reports(self, agent_reports: Dict[str, str]) -> str:
+        """
+        Helper method to standardize how agent outputs are presented to the LLM.
+        """
+        formatted = []
+        for agent_role, report in agent_reports.items():
+            formatted.append(f"=== EXPERT REPORT: {agent_role} ===\n{report}\n")
+        return "\n".join(formatted)
 
     @abstractmethod
-    def execute(self, agent_reports: Dict[str, str]) -> str:
+    def execute(self, agent_reports: Dict[str, str]) -> Any:
         """
         Takes the results from all parallel agents.
-        Returns the final verdict.
-        Implement LLM calls (OpenAI, Ollama, etc.) here. (if needed!)
+        Returns the final verdict (String, Dict, or Object).
+        Use `self._format_reports(agent_reports)` to prepare the context.
         """
         pass
