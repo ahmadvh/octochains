@@ -33,10 +33,7 @@ Standard AI chains suffer from **"Cognitive Tunnel Vision"**, where a model comm
 
 ## Octochains Anathomy 
 
-<div align="center">
-  <img width="100%" alt="octochains-architecture"  src="https://github.com/user-attachments/assets/74cb3609-4852-4d64-9c17-f4f3094674c7" />
-
-</div>
+https://github.com/user-attachments/assets/ede601fd-0a08-451f-b783-67d854767bb8
 
 ---
 
