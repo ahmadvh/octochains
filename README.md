@@ -162,3 +162,4 @@ Octochains is **Fair-code**, distributed under the **Business Source License 1.1
 * **The Guarantee:** On **May 10, 2030**, this version automatically becomes **Apache 2.0 (Open Source)**.
 
 **To access the Enterprise Reasoning Features, contact:** [ahmad.vh7@gmail.com](mailto:ahmad.vh7@gmail.com)
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=e5ca0204-186e-4871-b23b-249181c25fd2" />
