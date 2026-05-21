@@ -249,3 +249,4 @@ If you have questions about where a specific expert belongs in the Hub or need h
 ---
 
 Let's build the future of parallel reasoning together! ✨
+<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=a2cb3b15-b3c7-4f80-9113-2405c8554543" />
