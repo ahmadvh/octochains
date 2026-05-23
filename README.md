@@ -161,7 +161,6 @@ boss = ConflictChecker(
 The "Chief Integration Officer." It merges multiple isolated expert reports into a single, cohesive executive narrative, automatically resolving redundancies and identifying critical takeaways.
 ```python
 from octochains.aggregators import Synthesizer
-from octochains.aggregators import Synthesizer
 
 writer = Synthesizer(
     llm_callable=my_llm,
