@@ -127,7 +127,7 @@ class CROAgent(Agent):
 def main():
     print("Loading Confidential Target Dossier...")
     input_path = "cookbook/03-conflict-analysis/sample_input/target_dossier.txt"
-    output_path = "cookbook/03-conflict-analysis/output.txt"
+    output_path = "cookbook/03-conflict-analysis/results/output.txt"
     
     try:
         with open(input_path, "r") as f:
