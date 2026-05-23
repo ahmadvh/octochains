@@ -2,7 +2,7 @@
 
 [![GOSIM Spotlight 2026](https://img.shields.io/badge/GOSIM_2026-Top_10_Featured_Project-blueviolet)](https://gosim.org) 
 [![License: BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE.md)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue)](https://pypi.org/project/octochains/)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue)](https://pypi.org/project/octochains/)
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" alt="Octochains Logo" width="40%" style="max-width:260px; min-width:150px;"/>
@@ -140,6 +140,37 @@ report = engine.run("Full Project Alpha Investment Case File...")
 print(f"Consensus: {report.consensus}")
 print(f"Audit Trail: {report.traces}")
 ```
+## Official Aggregators
+While Octochains allows you to build custom aggregators (as shown in the Quickstart), we provide official, domain-agnostic aggregators designed for enterprise-grade reasoning. We are actively developing and will be adding more specialized aggregators in future releases.
+
+### 1. `ConflictChecker`
+The "Chief Justice" of your architecture. It audits expert reports for logical inconsistencies, timeline mismatches, and incompatible claims. 
+* **Strategy 1 (Prompt-Matrix):** Single-call audit using a structured internal matrix.
+* **Strategy 2 (Parallel Pairwise):** Multi-threaded execution that performs $\frac{N(N-1)}{2}$ isolated pairwise comparisons—ideal for absolute, reproducible auditability.
+
+```python
+from octochains.aggregators import ConflictChecker
+
+boss = ConflictChecker(
+    llm_callable=my_llm,
+    pairwise_audit=True, # Toggle to True for parallel multi-threaded execution 
+    show_log=True        # Visualize the audit TUI in your terminal
+)
+```
+###2. Synthesizer
+The "Chief Integration Officer." It merges multiple isolated expert reports into a single, cohesive executive narrative, automatically resolving redundancies and identifying critical takeaways.
+```python
+from octochains.aggregators import Synthesizer
+from octochains.aggregators import Synthesizer
+
+writer = Synthesizer(
+    llm_callable=my_llm,
+    show_log=True
+)
+
+```
+
+Check out the `/cookbook/` directory for full examples of these aggregators in action.
 
 ## Architecture & Strategy
 Octochains is designed for high-stakes environments where "vibe-based" AI isn't enough. It excels in **Medical Diagnostics**, **Legal Audits**, and **Strategic Business and Financial Analysis**.
