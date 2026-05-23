@@ -11,6 +11,9 @@
 import inspect
 from abc import ABC, abstractmethod
 from typing import Dict, List, Callable, Any, Optional
+import json
+import re
+from dataclasses import is_dataclass, asdict
 
 # Define the custom type alias for the framework
 # The callable takes a string prompt, but can return anything (String, Dict, Object)
@@ -44,7 +47,7 @@ class Agent(ABC):
     def __init__(self, 
                  role: str, 
                  goal: str, 
-                 input_description: str,
+                 input_description: Optional[str] = None,
                  llm_callable: Optional[LLMCallable] = None):
         """
         Initializes the Agent.
@@ -103,12 +106,31 @@ class Agent(ABC):
 
     def format_output(self, raw_result: Any) -> str:
         """
-        Ensures the engine always gets a string representation of the output
-        in Phase 1, preventing crashes if an object is returned.
+        Standardizes the agent's output into a clean string for the Aggregator.
+        Automatically serializes Dictionaries, Dataclasses, and Pydantic models into JSON.
+        Strips out reasoning traces from thinking models.
         """
+        # 1. Detect and serialize the object
         if isinstance(raw_result, str):
-            return raw_result
-        return str(raw_result)
+            string_output = raw_result
+        elif isinstance(raw_result, dict):
+            string_output = json.dumps(raw_result, indent=2)
+        elif is_dataclass(raw_result):
+            string_output = json.dumps(asdict(raw_result), indent=2)
+        elif hasattr(raw_result, 'model_dump_json'): 
+            # Support for Pydantic V2 models
+            string_output = raw_result.model_dump_json(indent=2)
+        elif hasattr(raw_result, 'json'): 
+            # Support for Pydantic V1 models
+            string_output = raw_result.json(indent=2)
+        else:
+            # Fallback for standard classes or primitives
+            string_output = str(raw_result)
+            
+        # 2. Strip thinking model artifacts before sending to the aggregator
+        clean_output = re.sub(r'<think>.*?(?:</think>|$)', '', string_output, flags=re.DOTALL)
+        
+        return clean_output.strip()
 
     def _discover_tools(self) -> List[Dict[str, Any]]:
         """

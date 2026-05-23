@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-05-23
+
+### Added
+- **Official Aggregators**: Introduced the first native, domain-agnostic aggregators to the Octochains core:
+    - `Synthesizer`: Merges isolated agent reports into a single cohesive narrative.
+    - `ConflictChecker`: Audits agent reports for logical inconsistencies using configurable `pairwise_audit` logic (supporting both multi-threaded isolation and dynamic prompt-matrices).
+- **Core JSON Utilities**: Added `utils.py` featuring a robust `parse_and_validate_json` helper to ensure LLM outputs strictly adhere to framework schemas, providing automated fault tolerance.
+- **Aggregator Schemas**: Added `SynthesisResult` and `ConflictReport` dataclasses to `schema.py` to support the new official aggregators.
+- **Advanced Execution Tracing**: Introduced a `show_log` boolean across the `Engine` and official aggregators. When enabled, it provides a clean, Terminal UI (TUI) tree structure to track asynchronous thread dispatching and API lifecycles.
+- **New Cookbook Recipe**: Added `Confict Analysis` demo using our new `ConflictChecker` aggregator. A high-stakes enterprise recipe demonstrating Executive Conflict Analysis for M&A Due Diligence.
+
+
+### Changed
+- **Directory Restructure**: Renamed the `demo_examples` directory to `cookbook` to align with standard open-source framework conventions.
+- **Agent Initialization**: Relaxed constraints on the `Agent` base class by making the `input_description` parameter optional.
+- **Medical Diagnostics Recipe**: Upgraded the existing medical diagnostics run script to natively utilize the new official `Synthesizer` aggregator.
+
+---
+
 ## [0.2.0] - 2026-05-18
 
 ### Added

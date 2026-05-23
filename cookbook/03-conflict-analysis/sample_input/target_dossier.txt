@@ -1,0 +1,17 @@
+CONFIDENTIAL MEMORANDUM: Project Horizon (Acquisition Target: "AuraMatch AI")
+
+Company Overview: AuraMatch AI is a fast-growing identity resolution and customer data matching platform. They boast a 300% YoY growth in user acquisition and a highly intuitive drag-and-drop UI that sales teams love.
+
+Financials: 
+- Asking Price: $12 Million.
+- Current Annual Recurring Revenue (ARR): $2.5M.
+- Burn Rate: $400k/month. 
+- Runway: 3 months.
+
+Technology & Operations:
+- Core tech relies heavily on cloud-based GPU clusters for real-time probabilistic matching.
+- Infrastructure costs are currently 45% of total revenue.
+- The founder/lead architect has indicated a desire to exit the company post-acquisition to pursue a sabbatical.
+
+Strategic Fit:
+Our sales team believes integrating AuraMatch into our existing enterprise suite will allow us to immediately up-sell to 50 of our Fortune 500 clients by Q3.

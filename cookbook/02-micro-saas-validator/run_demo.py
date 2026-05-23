@@ -154,10 +154,10 @@ if __name__ == "__main__":
     engine = Engine(agents=agents, aggregator=aggregator)
     
     # Broadcast to all agents in parallel, then aggregate
-    report = engine.run(problem_data=idea_input)
+    report = engine.run(problem_data=idea_input, show_log=True)
     
     # --- Create Results Directory ---
-    output_dir = "demo-examples/02-micro-saas-validator/results"
+    output_dir = "cookbook/02-micro-saas-validator/results"
     os.makedirs(output_dir, exist_ok=True)
     print(f"\n📁 Saving reports to '{output_dir}/' directory...\n")
 

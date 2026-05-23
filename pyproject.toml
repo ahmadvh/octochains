@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "octochains"
-version = "0.2.0"
+version = "0.3.0"
 description = "A framework for parallel, isolated multi-agent reasoning."
 readme = "README.md"
 license = { text = "BSL-1.1" }
@@ -13,9 +13,16 @@ authors = [
     { name="Ahmad", email="ahmad.vh7@gmail.com" }
 ]
 classifiers = [
-    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: Other/Proprietary License",
     "Operating System :: OS Independent",
+    "Typing :: Typed",
 ]
 
 dependencies = [
@@ -26,6 +33,11 @@ dependencies = [
 [project.optional-dependencies]
 openai = ["openai>=1.0.0"]
 litellm = ["litellm>=1.0.0"]
+dev = [
+    "pytest>=7.0.0",
+    "mypy>=1.0.0",
+    "build>=1.0.0"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/ahmadvh/octochains"

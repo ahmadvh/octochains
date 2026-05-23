@@ -9,9 +9,11 @@
 #
 # ==============================================================================
 import concurrent.futures
+import logging
 from typing import List, Dict
 from .base import Agent, Aggregator
 from .schema import Trace, Report
+from .exceptions import AggregatorError
 
 class Engine:
     """
@@ -43,6 +45,7 @@ class Engine:
         
         Args:
             problem_data (str): The input case or data to analyze.
+            show_log (bool): If True, prints a detailed execution trace to the console.
             
         Returns:
             Report: The final consensus and a full audit trail (traces).
@@ -50,22 +53,29 @@ class Engine:
         traces: List[Trace] = []
         agent_reports: Dict[str, str] = {}
 
+        if show_log:
+            print("\n============================================================")
+            print("[ENGINE] Booting Octochains Parallel Reasoning Workflow...")
+            print(f"[ENGINE] Provisioned Agents: {len(self.agents)}")
+            print(f"[ENGINE] Assigned Aggregator: {self.aggregator.role}")
+            print("============================================================\n")
+
         # ---------------------------------------------------------
         # PHASE 1: Parallel Specialist Analysis
         # ---------------------------------------------------------
-        
+        if show_log:
+            print("[ENGINE] >>> PHASE 1: Parallel Specialist Analysis")
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Create a map of 'Future' objects to their respective Agents
             if show_log:
                 for agent in self.agents:
-                    print(f"{agent.role} is executing...")
+                    print(f"  ├── [Dispatching] Thread launched for {agent.role}...")
             
             future_to_agent = {
                 executor.submit(agent.execute, problem_data): agent 
                 for agent in self.agents
             }
 
-            # Gather results as they complete (asynchronous completion)
             for future in concurrent.futures.as_completed(future_to_agent):
                 agent = future_to_agent[future]
                 try:
@@ -73,11 +83,13 @@ class Engine:
                     raw_result = future.result()
                     
                     # FAULT TOLERANCE: Standardize the output for the Aggregator
-                    # We use the method from our base.py to ensure it's a string.
                     string_result = agent.format_output(raw_result)
                     
                     agent_reports[agent.role] = string_result
                     
+                    if show_log:
+                        print(f"  └── [Success] Collected structured report from {agent.role}.")
+                        
                     # Log the success in the audit trace
                     traces.append(Trace(
                         agent_role=agent.role, 
@@ -90,6 +102,10 @@ class Engine:
                     error_msg = f"Failure: {str(exc)}"
                     agent_reports[agent.role] = f"ERROR: {error_msg}"
                     
+                    logging.error(f"Agent '{agent.role}' execution failed: {error_msg}")
+                    if show_log:
+                        print(f"  └── [ERROR] Thread failed for {agent.role}: {error_msg}")
+                    
                     traces.append(Trace(
                         agent_role=agent.role, 
                         status="error", 
@@ -100,10 +116,29 @@ class Engine:
         # ---------------------------------------------------------
         # PHASE 2: Aggregated Consensus
         # ---------------------------------------------------------
+        if show_log:
+            print(f"\n[ENGINE] >>> PHASE 2: Aggregated Consensus")
+            print(f"  ├── [Handoff] Piping {len(agent_reports)} expert reports to {self.aggregator.role}...")
+            
         try:
             consensus = self.aggregator.execute(agent_reports)
+            
+            if show_log:
+                print("  └── [Success] Aggregation complete. Consensus achieved.")
+                print("\n============================================================")
+                print("[ENGINE] Workflow Terminated Successfully.")
+                print("============================================================\n")
+                
         except Exception as exc:
-            consensus = f"CRITICAL ERROR: Aggregator failed to execute. Details: {str(exc)}"
+            logging.critical(f"Fatal Aggregator Failure: {str(exc)}")
+            if show_log:
+                print(f"  └── [FATAL ERROR] {self.aggregator.role} crashed: {str(exc)}")
+                print("\n============================================================")
+                print("[ENGINE] Workflow Terminated with Errors.")
+                print("============================================================\n")
+                
+            # Raise explicit exception to guarantee type-safety for downstream apps
+            raise AggregatorError(f"The aggregator '{self.aggregator.role}' failed to execute: {str(exc)}") from exc
 
         # Return the final structured Report object
         return Report(consensus=consensus, traces=traces)
