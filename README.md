@@ -88,7 +88,7 @@ class TechAnalyst(Agent):
 ### 4. Define an Aggregator
 The Aggregator waits for all experts to finish, reads their parallel reports, and makes the final executive decision.
 ```python
-from octochains import Aggregator
+from octochains.base import Aggregator
 from typing import Any
 
 class ChiefConsensusOfficer(Aggregator):
