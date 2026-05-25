@@ -1,13 +1,14 @@
 import json
 import re
 import logging
+from pydantic import BaseModel, ValidationError
 
 def parse_and_validate_json(raw_text: str, target_class):
     """
     1. Removes LLM 'thinking' traces (e.g., <think> tags).
     2. Extracts the first JSON object '{ ... }' from the text.
     3. Parses it into a dictionary.
-    4. Validates against the target class using its from_dict method.
+    4. Validates natively against Pydantic models (or standard classes).
     """
     cleaned_text = re.sub(r'<think>.*?(?:</think>|$)', '', raw_text, flags=re.DOTALL)
     
@@ -23,9 +24,16 @@ def parse_and_validate_json(raw_text: str, target_class):
         raise ValueError(f"Malformed JSON: {e}")
     
     try:
-        instance = target_class.from_dict(data)
-        return instance
+        # If target_class is a Pydantic model, use its native validation engine
+        if issubclass(target_class, BaseModel):
+            return target_class.model_validate(data)
+        
+        # Fallback for standard classes 
+        return target_class(**data)
+        
+    except ValidationError as e:
+        logging.error(f"Pydantic schema validation failed for {target_class.__name__}:\n{e}")
+        raise ValueError(f"Schema validation failed: {e.errors()}")
     except Exception as e:
         logging.error(f"Validation against {target_class.__name__} failed: {e}")
-        # CHANGED: Raise the error so the Aggregator's try/except block catches it
         raise ValueError(f"Schema validation failed: {e}")

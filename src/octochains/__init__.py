@@ -8,18 +8,17 @@
 #     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
 #
 # ==============================================================================
-from .base import Agent, Aggregator, tool
+from .base import Agent, Aggregator
 from .engine import Engine
 from .schema import Report, Trace
 from .exceptions import OctochainsError, AgentExecutionError
 
-__version__ = "0.1.0"
+__version__ = "0.3.1"
 __author__ = "Ahmad Varasteh"
 
 __all__ = [
     "Agent", 
     "Aggregator", 
-    "tool", 
     "Engine", 
     "Report", 
     "Trace", 

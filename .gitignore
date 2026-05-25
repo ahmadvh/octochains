@@ -107,7 +107,6 @@ Thumbs.db
 # Local data
 data/
 datasets/
-*.csv
 *.tsv
 *.xlsx
 
@@ -115,3 +114,5 @@ datasets/
 results/
 outputs/
 logs/
+
+

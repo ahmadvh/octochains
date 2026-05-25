@@ -1,7 +1,7 @@
 import os
-import json
-from dataclasses import dataclass
 from dotenv import load_dotenv
+
+from pydantic import BaseModel,  field_validator, ConfigDict
 
 from octochains.base import Agent
 from octochains.engine import Engine
@@ -24,62 +24,41 @@ def call_openai(prompt: str) -> str:
     return response.choices[0].message.content
 
 
-
 # ==============================================================================
-# 2. Define Output Schemas for Agents
+# 2. Define Output Schemas for Agents using pydantic
 # ==============================================================================
 
-@dataclass
-class FinancialAssessment:
+class FinancialAssessment(BaseModel):
     valuation_verdict: str
     risk_level: str
     primary_concern: str
+    
+    # Silently discard any extra hallucinated keys from the LLM
+    model_config = ConfigDict(extra='ignore')
 
-    @classmethod
-    def from_dict(cls, data: dict):
-        return cls(
-            valuation_verdict=str(data.get('valuation_verdict', '')),
-            risk_level=str(data.get('risk_level', '')),
-            primary_concern=str(data.get('primary_concern', ''))
-        )
-
-@dataclass
-class TechDueDiligence:
+class TechDueDiligence(BaseModel):
     architecture_viability: str
     estimated_refactor_timeline: str
     blockers: list[str]
+    
+    model_config = ConfigDict(extra='ignore')
 
+    # Robust coercion to handle LLM hallucinations 
+    @field_validator('blockers', mode='before')
     @classmethod
-    def from_dict(cls, data: dict):
-        raw_blockers = data.get('blockers', [])
-        
-        # Robust coercion to handle LLM hallucinations (strings instead of lists)
-        if isinstance(raw_blockers, str):
-            safe_blockers = [raw_blockers]
-        elif isinstance(raw_blockers, list):
-            safe_blockers = [str(b) for b in raw_blockers]
-        else:
-            safe_blockers = []
+    def ensure_list_format(cls, v):
+        if isinstance(v, str):
+            return [v]
+        elif isinstance(v, list):
+            return [str(b) for b in v]
+        return []
 
-        return cls(
-            architecture_viability=str(data.get('architecture_viability', '')),
-            estimated_refactor_timeline=str(data.get('estimated_refactor_timeline', '')),
-            blockers=safe_blockers
-        )
-
-@dataclass
-class RevenueProjection:
+class RevenueProjection(BaseModel):
     q3_upsell_confidence: str
     expected_integration_speed: str
     scaling_rationale: str  # Added to give the Conflict Checker enough context
-
-    @classmethod
-    def from_dict(cls, data: dict):
-        return cls(
-            q3_upsell_confidence=str(data.get('q3_upsell_confidence', '')),
-            expected_integration_speed=str(data.get('expected_integration_speed', '')),
-            scaling_rationale=str(data.get('scaling_rationale', ''))
-        )
+    
+    model_config = ConfigDict(extra='ignore')
 
 
 # ==============================================================================
@@ -95,6 +74,7 @@ class CFOAgent(Agent):
     def execute(self, data: str) -> FinancialAssessment:
         prompt = f"{self.goal}\n\nDOSSIER:\n{data}\n\nReturn ONLY raw JSON with keys: valuation_verdict, risk_level, primary_concern."
         raw_json = call_openai(prompt)
+        # parse_and_validate_json automatically utilizes FinancialAssessment.model_validate()
         return parse_and_validate_json(raw_json, FinancialAssessment)
 
 class CTOAgent(Agent):
@@ -156,7 +136,7 @@ def main():
     # Initialize the Aggregator
     boss = ConflictChecker(
         llm_callable=call_openai, 
-        pairwise_audit=True, 
+        pairwise_audit=True, # Running pairwise comparison
         custom_goal=ma_due_diligence_goal,
         max_threads= 3, # Optimized for 3 pairs (CFO/CTO, CFO/CRO, CTO/CRO)
         show_log=True
@@ -165,7 +145,6 @@ def main():
     # Initialize the Framework Engine
     engine = Engine(agents=agents, aggregator=boss)
     
-    print("\n[Engine] Executing Parallel Isolated Reasoning (Phase 1)...")
     report = engine.run(problem_data=dossier_data, show_log=True)
 
     # ==============================================================================
@@ -184,8 +163,8 @@ def main():
     for trace in report.traces:
         output_lines.append(f"\n[{trace.agent_role}]")
         if trace.status == "success":
-            # Dump the dataclass back to formatted JSON for the report
-            output_lines.append(json.dumps(trace.output.__dict__, indent=2))
+            # UPDATED: Use Pydantic's native JSON serialization instead of __dict__
+            output_lines.append(trace.output.model_dump_json(indent=2))
         else:
             output_lines.append(f"Error: {trace.error_message}")
 

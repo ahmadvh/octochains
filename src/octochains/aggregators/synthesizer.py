@@ -44,17 +44,21 @@ class Synthesizer(Aggregator):
         REPORTS:
         {compiled_reports}
         
-        Return ONLY valid JSON with the following structure:
+        Return ONLY valid JSON with the exact following structure:
         {{
             "narrative": "A cohesive narrative merging all unique expert perspectives.",
             "key_takeaways": ["List of actionable insights."],
             "confidence": 0.0, // Float [0.0 - 1.0] representing your subjective confidence.
             "citations": {{
-                "Agent Role": "A brief snippet or quote from this agent's report that supports your findings."
+                "<Insert Actual Agent Role>": "A brief snippet or quote from this agent's report that supports your findings."
             }}
         }}
 
-        CRITICAL: Do not include any conversational text, markdown formatting, or explanations outside the JSON.
+        CRITICAL DICTIONARY RULES FOR 'citations':
+        - The KEYS of the citations dictionary MUST be the exact names/roles of the agents who provided the reports (e.g., "Global Inventory Analyst", "Director of Logistics").
+        - Do NOT literally write "Agent Role" or "<Insert Actual Agent Role>". Use the real roles.
+
+        CRITICAL FORMATTING: Do not include any conversational text, markdown formatting, or explanations outside the JSON.
         """
         
         if self.show_log:

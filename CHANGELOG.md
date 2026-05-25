@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.4.0] - 2026-05-25
+
+### Added
+- **Engine Fault Tolerance**: The core `Engine` now features resilient error trapping. If an individual agent crashes (e.g., API timeout or execution failure), the engine safely catches the exception, logs it, updates the trace status to `"error"`, and allows the workflow to proceed to the Aggregator without crashing the main thread.
+- **New Cookbook Recipe**: Added the `Supply Chain Replanning` demo. This enterprise-grade recipe showcases autonomous, tool-calling agents and the official `Synthesizer` aggregator, demonstrating how to isolate agents into their own dedicated `agents/` microservice directory.
+- **Advanced Testing Suite**: Expanded `pytest` coverage to explicitly validate Engine resilience, Pydantic schema serialization, single-turn/two-turn API loops, and pure prompt generation.
+
+### Changed
+- **"Pure Engine" Architectural Pivot** *(Breaking Change)*: Octochains has officially transitioned into a lightweight, pure orchestration layer. The framework no longer dictates *how* LLMs call tools, giving developers 100% flexibility over their API execution loops.
+- **Native Provider Support**: Developers can now use official, native tool-calling arrays (like OpenAI's `tools=[...]`) directly within an agent's `execute()` method, eliminating framework-induced JSON parsing hallucinations and dramatically improving execution speed.
+- **Pydantic Output Parsing & Error Handling**: Upgraded the core execution pipeline to natively utilize Pydantic for output parsing and error handling. `format_output` now automatically serializes Pydantic models, and validation errors are safely trapped and parsed.
+- **Streamlined `_build_prompt`**: The base identity helper now exclusively generates the strict "Forced Perspective" constraint prompt without attempting to inject dynamic tool schemas.
+
+### Removed
+- **`@tool` Decorator Magic** *(Breaking Change)*: Stripped the `@tool` decorator, `_discover_tools()`, and the dynamic `TYPE_MAP` from the base `Agent` class. Octochains prioritizes enterprise stability and zero-tech-debt over fragile "magic" routing wrappers.
+
+### Fixed
+- **Synthesizer "Template Overfitting" Bug**: Fixed a prompt hallucination in the official `Synthesizer` aggregator where the LLM would literally output `"Agent Role"` as a dictionary key. The prompt now enforces strict, dynamic mapping of actual agent names for the `citations` output.
+
+---
+
 ## [0.3.0] - 2026-05-23
 
 ### Added

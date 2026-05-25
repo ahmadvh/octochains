@@ -1,0 +1,23 @@
+Route,Method,Cost_Per_Unit,Days_In_Transit
+US-South to ASIA-Pac,Road,$16.69,3
+EU-Central to EU-West,Rail,$8.19,12
+ASIA-Pac to AF-North,Road,$13.57,3
+US-West to SA-East,Rail,$16.21,11
+EU-Central to EU-West,Road,$19.05,3
+EU-Central to US-East,Road,$12.27,2
+SA-East to AF-North,Sea,$8.27,37
+ASIA-Pac to AF-North,Air,$55.01,4
+EU-Central to US-East,Rail,$19.57,5
+SA-East to AF-North,Rail,$16.53,10
+SA-East to AF-North,Rail,$11.52,12
+AF-North to US-East,Rail,$19.58,7
+EU-Central to US-East,Air,$86.58,3
+EU-Central to US-East,Sea,$3.53,36
+US-East to SA-East,Air,$68.93,4
+AF-North to US-East,Air,$90.39,3
+US-West to SA-East,Air,$45.66,1
+SA-East to AF-North,Road,$30.40,8
+EU-Central to US-East,Sea,$3.28,27
+EU-Central to US-East,Sea,$4.65,39
+US-East to EU-Central,Air,$45.00,2,
+US-East to EU-Central,Sea,$4.00,14,

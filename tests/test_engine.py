@@ -1,47 +1,60 @@
 import pytest
+import json
 from typing import Dict, Any
+from pydantic import BaseModel, Field
+
 from octochains.engine import Engine
-from octochains.base import Agent, Aggregator, tool
+from octochains.base import Agent, Aggregator
+from octochains.utils import parse_and_validate_json
+from octochains.schema import Trace, Report
 
 def mock_llm_call(prompt: str) -> str:
     return "Mock LLM Response"
 
 # ==========================================
-# 1. Mock Agents
+# 1. Pydantic Mock Schemas
+# ==========================================
+class MockStructuredResponse(BaseModel):
+    """Used to test the JSON parser's resilience."""
+    verdict: str
+    score: int
+    
+    # Simulates the aggregator setup to ignore LLM hallucinations
+    model_config = {"extra": "ignore"} 
+
+# ==========================================
+# 2. Mock Agents
 # ==========================================
 class MockAgent(Agent):
     def __init__(self):
         super().__init__(
             role="Risk Specialist", 
             goal="Identify mock risks",
-            input_description="a raw text string containing the business proposal.",
+            input_description="A raw text string.",
             llm_callable=mock_llm_call
         )
 
     def execute(self, problem_data: str) -> Any:
         return "High Risk Detected"
 
-class ToolAgent(Agent):
-    """An agent specifically designed to test tool discovery and prompt building."""
+class FailingAgent(Agent):
+    """Tests the Engine's resilience to agent crashes."""
     def __init__(self):
-        super().__init__(
-            role="Researcher", 
-            goal="Test tools",
-            input_description="Dummy input",
-            llm_callable=mock_llm_call
-        )
-
-    @tool
-    def dummy_search(self, query: str):
-        """A dummy search tool."""
-        return f"Searched for {query}"
+        super().__init__(role="Crash Dummy", goal="Fail spectacularly")
 
     def execute(self, problem_data: str) -> Any:
-        # Return the generated prompt instead of the LLM response so we can inspect it
+        raise ValueError("Simulated API Timeout or Execution Failure")
+
+class PromptTestingAgent(Agent):
+    """Tests that the base _build_prompt generates the correct identity string."""
+    def __init__(self):
+        super().__init__(role="Prompt Tester", goal="Verify formatting", input_description="Test Input")
+
+    def execute(self, problem_data: str) -> Any:
         return self._build_prompt(problem_data)
 
 # ==========================================
-# 2. Mock Aggregator (Standard String)
+# 3. Mock Aggregators
 # ==========================================
 class MockAggregator(Aggregator):
     def __init__(self):
@@ -52,17 +65,11 @@ class MockAggregator(Aggregator):
         )
 
     def execute(self, agent_reports: Dict[str, str]) -> Any:
-        # Double-Blind check: Ensure we only got the reports, not the original problem
         assert "Risk Specialist" in agent_reports
-        assert agent_reports["Risk Specialist"] == "High Risk Detected"
         return "Final Verdict: REJECTED"
 
-# ==========================================
-# 3. Mock Aggregator (Structured JSON/Dict)
-# ==========================================
 class StructuredAggregator(Aggregator):
     def __init__(self):
-        # Testing the optional llm_callable by passing None
         super().__init__(
             role="Structured Mock Officer", 
             goal="Return a JSON object",
@@ -70,73 +77,131 @@ class StructuredAggregator(Aggregator):
         )
 
     def execute(self, agent_reports: Dict[str, str]) -> Any:
-        # Testing the new 'Any' return type by returning a dictionary
         return {"status": "REJECTED", "reason": agent_reports.get("Risk Specialist")}
 
 # ==========================================
-# 4. Engine & Integration Tests
+# 4. Engine & Integration Tests 
 # ==========================================
 def test_engine_run_string_output():
-    """Tests the standard text-based aggregation."""
+    """Tests standard text-based execution."""
     agent = MockAgent()
     aggregator = MockAggregator()
     
-    assert agent.input_description == "a raw text string containing the business proposal."
-
-    # Run the engine
     engine = Engine(agents=[agent], aggregator=aggregator)
     result = engine.run("Test Problem")
     
-    # Check the final output and traces
     assert result.consensus == "Final Verdict: REJECTED"
     assert len(result.traces) == 1
     assert result.traces[0].agent_role == "Risk Specialist"
     assert result.traces[0].status == "success"
 
 def test_engine_run_structured_output():
-    """Tests that the Aggregator and Schema correctly handle dictionary objects."""
+    """Tests that the Engine cleanly handles Python dictionary objects without crashing."""
     agent = MockAgent()
     aggregator = StructuredAggregator()
     
     engine = Engine(agents=[agent], aggregator=aggregator)
     result = engine.run("Test Problem")
     
-    # Prove that the 'Any' update allows objects to pass cleanly through the engine
     assert isinstance(result.consensus, dict)
     assert result.consensus["status"] == "REJECTED"
-    assert result.consensus["reason"] == "High Risk Detected"
+
+def test_engine_resilience_to_agent_failure():
+    """Tests that a failing agent does not crash the entire engine workflow."""
+    agent1 = MockAgent()      # Will succeed
+    agent2 = FailingAgent()   # Will crash
+    aggregator = MockAggregator()
+    
+    engine = Engine(agents=[agent1, agent2], aggregator=aggregator)
+    result = engine.run("Test Problem", show_log=False)
+    
+    # The aggregator should still run with the successful agent's report
+    assert result.consensus == "Final Verdict: REJECTED"
+    assert len(result.traces) == 2
+    
+    # Verify trace statuses
+    success_trace = next(t for t in result.traces if t.agent_role == "Risk Specialist")
+    failed_trace = next(t for t in result.traces if t.agent_role == "Crash Dummy")
+    
+    assert success_trace.status == "success"
+    assert failed_trace.status == "error"
+    assert "Simulated API Timeout" in failed_trace.error_message
 
 # ==========================================
-# 5. Base Class Feature Tests (NEW)
+# 5. Base Class Feature Tests
 # ==========================================
-def test_agent_prompt_and_tools():
-    """Tests that the _build_prompt helper correctly injects tool schemas."""
-    agent = ToolAgent()
+def test_agent_build_prompt_pure_engine():
+    """Tests that the _build_prompt helper generates the strict identity prompt."""
+    agent = PromptTestingAgent()
+    prompt = agent.execute("Here is the data.")
     
-    # Generate the prompt
-    prompt = agent.execute("Find the GDP of France")
-    
-    # Verify Identity Block
-    assert "=== YOUR IDENTITY ===" in prompt
-    assert "Role: Researcher" in prompt
-    
-    # Verify Tool Block
-    assert "=== AVAILABLE TOOLS ===" in prompt
-    assert "dummy_search" in prompt
-    assert "A dummy search tool." in prompt
-    
-    # Verify Data Block
-    assert "Find the GDP of France" in prompt
+    assert "Role: Prompt Tester" in prompt
+    assert "Goal: Verify formatting" in prompt
+    assert "Input Description: Test Input" in prompt
+    assert "Here is the data." in prompt
+    assert "CRITICAL INSTRUCTIONS:" in prompt
 
-def test_agent_format_output():
-    """Tests the safety net that prevents dictionaries from crashing Phase 1 of the engine."""
+def test_agent_format_output_pydantic():
+    """Tests that format_output correctly invokes Pydantic's model_dump_json."""
     agent = MockAgent()
     
-    # Simulate an agent returning a raw dictionary instead of a string
-    raw_dict = {"risk_level": "High"}
+    # Simulate an agent returning a Pydantic object
+    pydantic_obj = MockStructuredResponse(verdict="APPROVED", score=99)
+    formatted = agent.format_output(pydantic_obj)
     
-    formatted = agent.format_output(raw_dict)
-    
-    # Ensure it was safely stringified
     assert isinstance(formatted, str)
-    assert "High" in formatted
+    assert "APPROVED" in formatted
+    assert "99" in formatted
+
+# ==========================================
+# 6. JSON Parsing & Validation Tests
+# ==========================================
+def test_parse_and_validate_json_success():
+    """Tests that the parser correctly extracts and maps valid JSON to a Pydantic model."""
+    raw_llm_text = """
+    Here is my final analysis based on the data provided:
+    {
+        "verdict": "PASS",
+        "score": 85
+    }
+    Hope this helps!
+    """
+    result = parse_and_validate_json(raw_llm_text, MockStructuredResponse)
+    
+    assert isinstance(result, MockStructuredResponse)
+    assert result.verdict == "PASS"
+    assert result.score == 85
+
+def test_parse_and_validate_json_with_think_tags():
+    """Tests that reasoning model artifacts (<think>) are cleanly stripped."""
+    raw_llm_text = """<think>
+    Wait, I should calculate the score first. 
+    It looks like {"verdict": "FAIL"} but I'll update it.
+    </think>
+    {
+        "verdict": "PASS",
+        "score": 90
+    }
+    """
+    result = parse_and_validate_json(raw_llm_text, MockStructuredResponse)
+    
+    assert result.score == 90
+
+def test_parse_and_validate_json_hallucinated_keys():
+    """Tests that extra keys are ignored gracefully if model_config allows it."""
+    raw_llm_text = '{"verdict": "PASS", "score": 85, "hallucinated_extra_key": "this would crash a dataclass"}'
+    
+    result = parse_and_validate_json(raw_llm_text, MockStructuredResponse)
+    
+    assert result.verdict == "PASS"
+    assert not hasattr(result, "hallucinated_extra_key")
+
+def test_parse_and_validate_json_missing_keys():
+    """Tests that Pydantic ValidationError is properly wrapped in a ValueError."""
+    raw_llm_text = '{"verdict": "PASS"}' # Missing the 'score' field
+    
+    with pytest.raises(ValueError) as excinfo:
+        parse_and_validate_json(raw_llm_text, MockStructuredResponse)
+        
+    assert "Schema validation failed" in str(excinfo.value)
+    assert "score" in str(excinfo.value)

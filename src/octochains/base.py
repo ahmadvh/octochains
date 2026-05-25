@@ -8,41 +8,34 @@
 #     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
 #
 # ==============================================================================
+# ==============================================================================
+# Copyright (c) 2026 Ahmad Varasteh (octochains). All rights reserved.
+#
+# Licensed under the Business Source License 1.1 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
+#
+# ==============================================================================
 import inspect
 from abc import ABC, abstractmethod
 from typing import Dict, List, Callable, Any, Optional
 import json
 import re
 from dataclasses import is_dataclass, asdict
+from pydantic import BaseModel 
 
 # Define the custom type alias for the framework
 # The callable takes a string prompt, but can return anything (String, Dict, Object)
 LLMCallable = Callable[[str], Any]
 
-def tool(func: Callable):
-    """
-    A decorator to mark an Agent's method as a tool.
-    It marks the function so the Agent can 'discover' it dynamically.
-    """
-    func._is_octochain_tool = True
-    return func
-
-
 class Agent(ABC):
     """
-    The Superior Parent Class for all specialized parallel workers.
-    Enforces 'Forced Perspective', provides dynamic tool injection, 
-    and handles boilerplate prompt generation.
+    The Base Parent Class for all specialized parallel workers.
+    Enforces 'Forced Perspective' and normalizes output, while leaving 
+    execution and tool-calling entirely up to the user.
     """
-    # Maps Python type hints to JSON Schema types for universal LLM compatibility
-    TYPE_MAP = {
-        str: "string",
-        int: "integer",
-        float: "number",
-        bool: "boolean",
-        list: "array",
-        dict: "object"
-    }
 
     def __init__(self, 
                  role: str, 
@@ -57,8 +50,6 @@ class Agent(ABC):
             goal: What this agent is trying to achieve.
             input_description: A short description of the input data. 
             llm_callable: A model-agnostic execution function. 
-                          It MUST accept a single argument (prompt: str).
-                          It can return a raw string or a structured object.
         """
         self.role = role
         self.goal = goal
@@ -68,8 +59,8 @@ class Agent(ABC):
     def _build_prompt(self, problem_data: str) -> str:
         """
         The "Sensible Default" prompt builder.
-        Automatically constructs a highly structured, strict prompt.
-        If any @tool methods exist, it dynamically injects their schemas here.
+        Automatically constructs a highly structured, strict identity prompt.
+        Users can utilize this in their custom execute() methods to establish the persona.
         """
         prompt = f"""
             You are operating in a highly restricted, isolated environment.
@@ -80,48 +71,36 @@ class Agent(ABC):
             Goal: {self.goal}
 
             === YOUR TASK ===
-            Data Description: {self.input_description}
+            Input Description: {self.input_description or "Unstructured context data."}
+            
+            === RAW PROBLEM DATA ===
+            {problem_data}
+
+            CRITICAL INSTRUCTIONS:
+            Answer strictly from the perspective of your Role. 
+            Do not provide a generic summary. Provide actionable, specialized insights based on the data above.
+
+            YOUR SPECIALIZED REPORT:
             """
-        
-        # DYNAMIC TOOL INJECTION
-        tools = self._discover_tools()
-        if tools:
-            prompt += "\n=== AVAILABLE TOOLS ===\n"
-            prompt += "You have access to the following tools. If you need to use a tool, output your request in JSON format.\n"
-            for t in tools:
-                prompt += f"- Tool Name: {t['name']}\n  Description: {t['description']}\n  Parameters: {t['parameters']}\n"
-
-        prompt += f"""
-                === RAW PROBLEM DATA ===
-                {problem_data}
-
-                CRITICAL INSTRUCTIONS:
-                Answer strictly from the perspective of your Role. 
-                Do not provide a generic summary. Provide actionable, specialized insights based on the data above.
-
-                YOUR SPECIALIZED REPORT:
-                """
-        
         return prompt
 
     def format_output(self, raw_result: Any) -> str:
         """
         Standardizes the agent's output into a clean string for the Aggregator.
         Automatically serializes Dictionaries, Dataclasses, and Pydantic models into JSON.
-        Strips out reasoning traces from thinking models.
+        Stripping out reasoning traces from thinking models.
         """
-        # 1. Detect and serialize the object
+        # 1. Detect and serialize the object using native Pydantic serializers first
         if isinstance(raw_result, str):
             string_output = raw_result
+        elif isinstance(raw_result, BaseModel):
+            string_output = raw_result.model_dump_json(indent=2)
         elif isinstance(raw_result, dict):
             string_output = json.dumps(raw_result, indent=2)
         elif is_dataclass(raw_result):
             string_output = json.dumps(asdict(raw_result), indent=2)
-        elif hasattr(raw_result, 'model_dump_json'): 
-            # Support for Pydantic V2 models
-            string_output = raw_result.model_dump_json(indent=2)
-        elif hasattr(raw_result, 'json'): 
-            # Support for Pydantic V1 models
+        elif hasattr(raw_result, 'json') and callable(getattr(raw_result, 'json')): 
+            # Support for legacy Pydantic V1 models if passed
             string_output = raw_result.json(indent=2)
         else:
             # Fallback for standard classes or primitives
@@ -132,50 +111,14 @@ class Agent(ABC):
         
         return clean_output.strip()
 
-    def _discover_tools(self) -> List[Dict[str, Any]]:
-        """
-        Discovers and formats tools marked with the @tool decorator.
-        """
-        discovered = []
-        for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
-            if getattr(method, '_is_octochain_tool', False):
-                sig = inspect.signature(method)
-                doc = inspect.getdoc(method) or "No description provided."
-                
-                parameters = {
-                    "type": "object",
-                    "properties": {},
-                    "required": []
-                }
-                
-                for param_name, param in sig.parameters.items():
-                    if param_name == 'self':
-                        continue
-                        
-                    json_type = self.TYPE_MAP.get(param.annotation, "string")
-                    
-                    parameters["properties"][param_name] = {
-                        "type": json_type,
-                        "description": f"Input for {param_name}"
-                    }
-                    
-                    if param.default is inspect.Parameter.empty:
-                        parameters["required"].append(param_name)
-
-                discovered.append({
-                    "name": name,
-                    "description": doc,
-                    "parameters": parameters
-                })
-        return discovered
-
     @abstractmethod
     def execute(self, problem_data: str) -> Any:
         """
         The core reasoning logic.
         Use `self._build_prompt(problem_data)` to get your strict isolated prompt,
-        or completely ignore it and write your own custom prompt if using advanced techniques.
-        Execute it using `self.llm_callable(prompt)`.
+        or completely ignore it and write your own custom prompt.
+        
+        Tool calling, API execution, and parsing must be handled here by the user.
         """
         pass
 
