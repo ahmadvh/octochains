@@ -157,7 +157,7 @@ boss = ConflictChecker(
     show_log=True        # Visualize the audit TUI in your terminal
 )
 ```
-###2. Synthesizer
+### 2. `Synthesizer`
 The "Chief Integration Officer." It merges multiple isolated expert reports into a single, cohesive executive narrative, automatically resolving redundancies and identifying critical takeaways.
 ```python
 from octochains.aggregators import Synthesizer
