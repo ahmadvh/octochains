@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Octochains | Document Audit</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        Octochains | Multi-Agent Document Audit
+    </header>
+
+    <main>
+        <div id="left-panel">
+            <div class="left-panel-header">
+                <div id="agent-legend" class="legend-container" style="display: none;"></div>
+            </div>
+            <div id="document-content"></div>
+        </div>
+
+        <div id="right-panel">
+            <div id="drop-zone">
+                <h3 class="drop-title">Upload Document</h3>
+                <p class="drop-subtitle">Drag & drop a dense PDF lease or contract here to begin the multi-agent audit.</p>
+                <input type="file" id="file-input" accept=".pdf" />
+            </div>
+
+            <div id="controls">
+                <button id="dispatch-btn" class="primary">Dispatch Parallel Agents</button>
+            </div>
+
+            <div id="feed"></div>
+        </div>
+        
+        <div id="insight-tooltip" class="insight-tooltip"></div>
+    </main>
+
+    <script src="app.js" defer></script>
+</body>
+</html>

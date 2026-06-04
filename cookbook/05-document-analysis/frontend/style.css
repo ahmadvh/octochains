@@ -1,0 +1,313 @@
+:root {
+    --bg-main: #f0f4f9;
+    --bg-surface: #ffffff;
+    --text-primary: #1f1f1f;
+    --text-secondary: #444746;
+    --border-light: #e3e3e3;
+    
+    --user-bg: #d3e3fd;
+    --user-text: #041e49;
+    --team-bg: #f0f4f9;
+    --team-text: #1f1f1f;
+    --purple-brand: #5b247a;
+    --blue-brand: #1bcedf;
+    --green-brand: #34a853;
+
+    --brand-gradient: linear-gradient(90deg, #5b247a 0%, #001881 100%);
+    --header-height: 64px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+header {
+    height: var(--header-height);
+    background-color: var(--bg-surface); 
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    font-weight: 600;
+    font-size: 1.2rem;
+    
+    /* Gradient Text Styling */
+    background-image: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* --- LAYOUT PANELS --- */
+#left-panel {
+    flex: 0; 
+    background: #e9eef6; /* Document contrast background */
+    border-right: 1px solid var(--border-light);
+    overflow-y: auto;
+    padding: 0;
+    transition: flex 0.4s ease;
+    opacity: 0;
+}
+
+#left-panel.active {
+    flex: 1;
+    padding: 32px;
+    opacity: 1;
+}
+
+#right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 32px;
+    overflow-y: auto;
+    align-items: center;
+    justify-content: center;
+}
+
+#right-panel.active {
+    flex: 0.8;
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+/* --- DOCUMENT VIEWER (Card View) --- */
+.left-panel-header {
+    position: sticky;
+    top: 24px;
+    width: 100%;
+    height: 0; 
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.legend-container {
+    margin-right: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-main);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    font-size: 0.85rem;
+    pointer-events: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.legend-item input[type="checkbox"] {
+    accent-color: var(--purple-brand);
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.legend-color-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+#document-content {
+    margin-top: 24px; 
+    line-height: 1.7;
+    background-color: #ffffff;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 64px 80px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+    border: 1px solid #d1d5db;
+    font-family: "Georgia", "Times New Roman", serif; 
+    color: #1a1a1a;
+    font-size: 1.05rem;
+}
+
+#document-content p {
+    margin-bottom: 16px;
+}
+
+#document-content b {
+    font-weight: 700;
+    color: #000000;
+}
+
+.document-sentence {
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: box-shadow 0.2s ease, background 0.3s ease;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+}
+
+.document-sentence.has-highlight:hover {
+    box-shadow: inset 0 0 0 1000px rgba(0, 0, 0, 0.1);
+}
+
+/* --- DRAG & DROP ZONE --- */
+#drop-zone {
+    width: 100%;
+    max-width: 600px;
+    border: 2px dashed var(--purple-brand);
+    border-radius: 12px;
+    padding: 64px 32px;
+    text-align: center;
+    background: rgba(91, 36, 122, 0.03);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#drop-zone:hover, #drop-zone.dragover {
+    background: rgba(91, 36, 122, 0.08);
+    border-color: var(--blue-brand);
+}
+
+.drop-title {
+    color: var(--purple-brand); 
+    margin-bottom: 8px;
+}
+
+.drop-subtitle {
+    color: var(--text-secondary);
+}
+
+#file-input { display: none; }
+
+/* --- CONTROLS & FEED --- */
+#controls {
+    display: none;
+    margin-bottom: 24px;
+}
+
+button.primary {
+    background: var(--brand-gradient);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    width: 100%;
+}
+
+button.primary:hover { opacity: 0.9; }
+button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#feed {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* --- CARDS & TOOLTIPS --- */
+.card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    animation: slideIn 0.3s ease-out;
+}
+
+.agent-card { border-left: 4px solid var(--blue-brand); }
+.conflict-card { border-left: 4px solid #d93025; background: #fce8e6; }
+
+.card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.status-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.insight-tooltip {
+    position: absolute;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-light);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-radius: 8px;
+    padding: 16px;
+    width: 380px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: auto; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+}
+
+.insight-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tooltip-agent-block {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.tooltip-agent-block:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.tooltip-agent-name {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.tooltip-insight-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
