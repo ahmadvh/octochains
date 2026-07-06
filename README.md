@@ -10,15 +10,14 @@
 
 **Octochains** is a zero-dependency Python framework for **fault-tolerant, parallel, and isolated multi-agent reasoning and consensus**. It is purpose-built for complex, decomposable tasks that require independent, multi-perspective analysis without logical contamination.
 
-Unlike traditional sequential agent chains where models bias each other through shared chat histories, Octochains executes domain specialists in **Parallel Isolated Threads**. Every angle of a high-stakes decision—from clinical diagnostics to financial risk and legal audits—is evaluated in pristine isolation before being synthesized by a centralized verification layer.
+Unlike traditional sequential agent chains where models bias each other through shared chat histories, Octochains executes domain specialists in **Parallel Isolated Threads**. Every angle of a high-stakes decision, from clinical diagnostics to financial risk and legal audits, is evaluated in pristine isolation before being synthesized by a centralized verification layer.
 
 ## Why Octochains?
 
 Standard multi-agent frameworks suffer from **Cognitive Tunnel Vision** and **Groupthink**, where early outputs dictate downstream reasoning. Octochains eliminates this through a robust, thread-safe architecture:
 
 * **Parallel Isolation:** Expert agents operate in private threads with zero awareness of peer outputs, guaranteeing objective, unpolluted analysis.
-* **Thread-Level Fault Tolerance:** A crashing agent (e.g., due to an API timeout or rate limit) is cleanly isolated as an error trace without stalling the workforce or contaminating the aggregator prompt.
-* **Centralized Consensus:** A specialized "Chief Justice" aggregator audits isolated reports, resolving logical conflicts and highlighting evidence gaps before delivering a type-safe verdict.
+* **Centralized Consensus:** A specialized aggregator audits isolated reports, resolving logical conflicts and highlighting evidence gaps before delivering a type-safe verdict.
 * **Audit-First Design:** Every execution generates an immutable, 100% traceable log of expert rationale and error states, meeting **EU AI Act** requirements for monitorable enterprise AI.
 
 ## How Octochains Compares
@@ -52,9 +51,9 @@ https://github.com/user-attachments/assets/ede601fd-0a08-451f-b783-67d854767bb8
 Octochains is designed to be developer-first, model-agnostic, and lightweight.
 
 ### 1. Install
-
+```batch
 pip install octochains
-
+```
 ### 2. Bring Your Own LLM (Zero-Dependency)
 Octochains is a "Pure Engine." It does not force you to install heavy SDKs or learn proprietary API wrappers. You maintain 100% control over your models and API keys.
 ```python
@@ -72,7 +71,7 @@ def my_llm(prompt: str) -> str:
 ```
 ### 3. Define Specialist Agents
 Agents inherit from `Agent` and implement an `execute()` method. The framework builds the strict "Forced Perspective" identity prompt for you, while you retain full control over the execution loop.
-
+```python
 from octochains.base import Agent
 
 class TechAnalyst(Agent):
@@ -91,12 +90,14 @@ class TechAnalyst(Agent):
 
 Please provide your expert analysis."
         return my_llm(full_prompt)
+```
 
 💡 **Using Tools?** You own the `execute()` loop! You can bypass the simple text wrapper and inject your provider's native tool schemas (e.g., OpenAI functions or external database hooks) directly into the API call.
 
 ### 4. Define an Aggregator
 The Aggregator waits for all experts to finish, reads their parallel reports, and synthesizes the final executive decision.
 
+```python
 from octochains.base import Aggregator
 from typing import Any
 
@@ -119,9 +120,12 @@ class ChiefConsensusOfficer(Aggregator):
         FINAL VERDICT:
         """
         return self.llm_callable(prompt)
+```
 
 ### 5. Run the Parallel Engine
 The engine launches all agents concurrently, traps individual thread failures without crashing the pool, and pipes clean data to the aggregator.
+
+```python
 
 from octochains.engine import Engine
 
@@ -145,8 +149,11 @@ print(f"Consensus:
 {report.consensus}") 
 print(f"Audit Trail:
 {report.traces}")
+```
 
 ### Expected Terminal Output
+
+```batch
 
 [ENGINE] Booting Octochains Parallel Reasoning Workflow...
 [ENGINE] Provisioned Agents: 1 | Assigned Aggregator: Chief Aggregator
@@ -159,6 +166,7 @@ Technical feasibility is APPROVED. The architecture supports isolated scaling wi
 
 Audit Trail:
 [Trace(agent_role='Chief Technology Officer', status='success', error_message=None)]
+```
 
 ## Official Enterprise Aggregators
 
@@ -168,9 +176,10 @@ While Octochains allows you to build custom aggregators, we provide out-of-the-b
 The deterministic "Chief Justice" of your architecture. It audits expert reports for logical contradictions, timeline mismatches, and incompatible claims.
 
 * **Strategy 1 (Prompt-Matrix):** Single-call audit using a structured internal comparative matrix.
-* **Strategy 2 (Parallel Pairwise):** Multi-threaded execution that programmatically spawns isolated bilateral threads across all unique agent pairs ($rac{N(N-1)}{2}$) for absolute, reproducible auditability.
+* **Strategy 2 (Parallel Pairwise):** Multi-threaded execution that programmatically spawns isolated bilateral threads across all unique agent pairs for absolute, reproducible auditability.
 * **Mathematical Safety Gate:** Automatically aborts audits without wasting API tokens if upstream failures reduce surviving reports to fewer than 2.
 
+```python
 from octochains.aggregators import ConflictChecker
 
 boss = ConflictChecker(
@@ -179,17 +188,17 @@ boss = ConflictChecker(
     max_threads=5,
     show_log=True
 )
-
+```
 ### 2. Synthesizer
 The "Chief Integration Officer." It merges multiple isolated expert reports into a single cohesive executive narrative, automatically resolving redundancies, mapping citations strictly to responding agents, and zeroing out confidence scores if upstream pipelines fail.
-
+```python
 from octochains.aggregators import Synthesizer
 
 writer = Synthesizer(
     llm_callable=my_llm,
     show_log=True
 )
-
+```
 Check out the `/cookbook/` directory for full examples of these aggregators in action.
 
 ## Repository Structure
