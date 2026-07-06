@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.1] - 2026-07-07
+
+### Added
+
+#### Aggregator Resilience Gates
+Implemented a `min_required_reports` threshold in the `Aggregator` base logic. This prevents vacuous consensus generation when upstream agent failures result in insufficient evidence for reliable aggregation.
+
+#### Anti-Hallucination Guardrails
+Introduced automatic system-level prompt injection in the `Synthesizer`. When only a partial panel of specialist agents is available, the framework explicitly instructs the reasoning model to synthesize conclusions exclusively from the available reports, reducing the risk of hallucinated expert opinions.
+
+#### Dynamic Bilateral Binding
+Updated the `ConflictChecker` with strict role binding for the `citations` and `involved_agents` schemas. The reasoning model can now reference only agents that actually produced reports, preventing fabricated agent names during bilateral conflict analysis.
+
+---
+
+### Fixed
+
+#### Engine Aggregator Hand-off
+Refactored the `Engine` execution pipeline so that failed agent outputs remain available in the audit trace for debugging while being excluded from the data passed to aggregators. This prevents exception messages and stack traces from contaminating the synthesis context provided to LLMs.
+
+#### Multi-threaded Thread Isolation
+Resolved `StopIteration` exceptions and race conditions in the `ConflictChecker` pairwise threading implementation. Improved failure diagnostics by enabling `exc_info=True`, ensuring complete stack traces are captured for individual thread failures without disrupting the thread pool.
+
+#### Framework Export Integrity
+Fixed missing package dunder definitions (including `__all__` and `__init__`) in `src/octochains/__init__.py` and `base.py`. Also corrected export inconsistencies in `aggregators/__init__.py` to ensure proper package imports.
+
+---
+
 ## [0.4.0] - 2026-05-25
 
 ### Added

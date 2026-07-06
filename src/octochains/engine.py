@@ -5,7 +5,6 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
 #
 # ==============================================================================
 import concurrent.futures
@@ -36,23 +35,23 @@ class Engine:
 
     def run(self, problem_data: str, show_log: bool = False) -> Report:
         """
-        Executes the parallel reasoning workflow.
+        Executes the parallel reasoning workflow with thread-level fault isolation.
         
         1. Launches all agents simultaneously in separate threads.
-        2. Collects raw results (Strings, Dicts, or Pydantic objects).
-        3. Formats results into strings for the Aggregator.
-        4. Aggregator generates a final report based on the collected data.
+        2. Collects raw results and traps any individual execution failures.
+        3. Pipes ONLY successful specialist evaluations to the Aggregator.
+        4. Aggregator synthesizes a final consensus based on valid data.
         
         Args:
             problem_data (str): The input case or data to analyze.
             show_log (bool): If True, prints a detailed execution trace to the console.
             
         Returns:
-            Report: The final consensus and a full audit trail (traces).
+            Report: The final consensus and a comprehensive audit trail (traces).
         """
         traces: List[Trace] = []
-        agent_reports: Dict[str, str] = {}
-
+        valid_agent_reports: Dict[str, str] = {}
+        logger = logging.getLogger("octochains")
         if show_log:
             print("\n============================================================")
             print("[ENGINE] Booting Octochains Parallel Reasoning Workflow...")
@@ -61,7 +60,7 @@ class Engine:
             print("============================================================\n")
 
         # ---------------------------------------------------------
-        # PHASE 1: Parallel Specialist Analysis
+        # PHASE 1: Parallel Specialist Analysis (Fault Isolated)
         # ---------------------------------------------------------
         if show_log:
             print("[ENGINE] >>> PHASE 1: Parallel Specialist Analysis")
@@ -79,33 +78,33 @@ class Engine:
             for future in concurrent.futures.as_completed(future_to_agent):
                 agent = future_to_agent[future]
                 try:
-                    # Capture the raw output (could be Pydantic, Dict, or Str)
+                    # Retrieve raw output from the isolated thread
                     raw_result = future.result()
                     
-                    # FAULT TOLERANCE: Standardize the output for the Aggregator
+                    # Standardize output string strictly for valid results
                     string_result = agent.format_output(raw_result)
-                    
-                    agent_reports[agent.role] = string_result
+                    valid_agent_reports[agent.role] = string_result
                     
                     if show_log:
                         print(f"  └── [Success] Collected structured report from {agent.role}.")
                         
-                    # Log the success in the audit trace
+                    # Log success in the immutable audit trace
                     traces.append(Trace(
                         agent_role=agent.role, 
                         status="success", 
-                        output=raw_result # Trace keeps the rich object if available
+                        output=raw_result,
+                        error_message=None
                     ))
                     
                 except Exception as exc:
-                    # If an agent fails, the show must go on.
-                    error_msg = f"Failure: {str(exc)}"
-                    agent_reports[agent.role] = f"ERROR: {error_msg}"
+                    # Fault Isolation: Trap exception so remaining agents continue uninterrupted
+                    error_msg = f"Agent '{agent.role}' failed: {str(exc)}"
+                    logger.error(error_msg, exc_info=True)
                     
-                    logging.error(f"Agent '{agent.role}' execution failed: {error_msg}")
                     if show_log:
-                        print(f"  └── [ERROR] Thread failed for {agent.role}: {error_msg}")
+                        print(f"  └── [ERROR] Thread failed for {agent.role}: {str(exc)}")
                     
+                    # Record error in trace audit, but DO NOT pollute valid_agent_reports
                     traces.append(Trace(
                         agent_role=agent.role, 
                         status="error", 
@@ -114,14 +113,23 @@ class Engine:
                     ))
 
         # ---------------------------------------------------------
-        # PHASE 2: Aggregated Consensus
+        # PHASE 2: Aggregated Consensus (Blind Synthesis)
         # ---------------------------------------------------------
         if show_log:
             print(f"\n[ENGINE] >>> PHASE 2: Aggregated Consensus")
-            print(f"  ├── [Handoff] Piping {len(agent_reports)} expert reports to {self.aggregator.role}...")
+            print(f"  ├── [Handoff] Piping {len(valid_agent_reports)} valid reports to {self.aggregator.role}...")
             
+        # Guard against total failure where all agents errored out
+        if not valid_agent_reports:
+            fatal_msg = "All parallel specialist agents failed to execute. Cannot compute consensus."
+            logger.critical(fatal_msg)
+            if show_log:
+                print(f"  └── [FATAL ERROR] {fatal_msg}")
+            raise AggregatorError(fatal_msg)
+
         try:
-            consensus = self.aggregator.execute(agent_reports)
+            # Aggregator synthesizes purely from valid specialist opinions
+            consensus = self.aggregator.execute(valid_agent_reports)
             
             if show_log:
                 print("  └── [Success] Aggregation complete. Consensus achieved.")
@@ -130,15 +138,13 @@ class Engine:
                 print("============================================================\n")
                 
         except Exception as exc:
-            logging.critical(f"Fatal Aggregator Failure: {str(exc)}")
+            logger.critical(f"Fatal Aggregator Failure: {str(exc)}", exc_info=True)
             if show_log:
                 print(f"  └── [FATAL ERROR] {self.aggregator.role} crashed: {str(exc)}")
                 print("\n============================================================")
                 print("[ENGINE] Workflow Terminated with Errors.")
                 print("============================================================\n")
                 
-            # Raise explicit exception to guarantee type-safety for downstream apps
             raise AggregatorError(f"The aggregator '{self.aggregator.role}' failed to execute: {str(exc)}") from exc
 
-        # Return the final structured Report object
         return Report(consensus=consensus, traces=traces)

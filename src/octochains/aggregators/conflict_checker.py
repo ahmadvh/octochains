@@ -5,16 +5,17 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
 #
 # ==============================================================================
 import itertools
 import logging
 import concurrent.futures
-from typing import Callable, Optional
+from typing import Callable, Optional, List, Dict, Any
 from octochains.base import Aggregator
 from octochains.schema import ConflictReport, Conflict
 from octochains.utils import parse_and_validate_json
+
+logger = logging.getLogger("octochains")
 
 class ConflictChecker(Aggregator):
     """
@@ -38,23 +39,6 @@ class ConflictChecker(Aggregator):
       simultaneous, completely isolated API calls using a ThreadPoolExecutor.
     - Pros: Ironclad determinism. Hyper-focused precision on direct bilateral contradictions.
     - Cons: API costs scale quadratically with the number of agents.
-
-    The Importance of `custom_goal` (Domain-Specific Logic)
-    ------------------------------------------------------------------
-    In multi-agent reasoning, a generic prompt is a weak prompt. The `custom_goal` parameter allows 
-    developers to define the exact "laws of logic" for their specific industry and use case.
-    
-    - Default Behavior: If omitted, the aggregator defaults to a highly optimized, universal logic prompt 
-      that enforces strict counting rules and evidence thresholds (ideal for general logical disputes).
-    - Overriding the Default: When providing a `custom_goal`, developers MUST include strict structural 
-      guardrails. For example:
-        * Medical: "A conflict exists ONLY if Agent A's prescribed treatment makes Agent B's diagnosis fatal."
-        * DevOps: "A conflict exists ONLY if the Frontend's requested payload is impossible for the Backend."
-        * Legal: "A conflict exists ONLY if complying with Agent A forces a violation of Agent B's rules."
-      
-      CRITICAL: When overriding, you must instruct the LLM on how to count and consolidate conflicts. 
-      Failure to provide strict consolidation rules in a `custom_goal` will result in advanced reasoning 
-      models splitting single root-cause issues into multiple false-positive conflicts.
     """
    
     def __init__(self, 
@@ -64,7 +48,6 @@ class ConflictChecker(Aggregator):
                  max_threads: int = 5,
                  show_log: bool = False):
         
-        # Generalized for any domain (Tech, Med, Finance, Logic)
         default_goal = (
             "Outcome: A structured audit identifying logical contradictions, factual discrepancies, "
             "fundamentally incompatible claims between the provided agent reports.\n"
@@ -84,11 +67,27 @@ class ConflictChecker(Aggregator):
         self.max_threads = max_threads
         self.show_log = show_log
 
-    def execute(self, agent_reports: dict[str, str]) -> ConflictReport:
+    def execute(self, agent_reports: Dict[str, str]) -> ConflictReport:
         if self.show_log:
             mode_str = "Parallel Pairwise (Multi-Threaded)" if self.pairwise_audit else "Global Prompt-Matrix"
             print(f"\n[ConflictChecker] Starting execution. Mode: {mode_str}")
             print(f"[ConflictChecker] Total input reports to audit: {len(agent_reports)}")
+
+        
+        if len(agent_reports) < 2:
+            error_msg = (
+                f"Audit Aborted: Conflict detection mathematically requires at least 2 valid expert reports, "
+                f"but only received {len(agent_reports)}. Upstream agent failures prevented pairwise comparison."
+            )
+            logger.warning(f"[ConflictChecker] {error_msg}")
+            if self.show_log:
+                print(f"[ConflictChecker WARNING] {error_msg}")
+                
+            return ConflictReport(
+                has_conflicts=False,
+                conflicts=[],
+                summary=error_msg
+            )
 
         if self.pairwise_audit:
             return self._run_parallel_pairwise_audit(agent_reports)
@@ -98,12 +97,11 @@ class ConflictChecker(Aggregator):
     # =========================================================================
     # STRATEGY 1: Dynamic Prompt Matrix (Single Call, Low Cost)
     # =========================================================================
-    def _run_prompt_matrix_audit(self, agent_reports: dict[str, str]) -> ConflictReport:
+    def _run_prompt_matrix_audit(self, agent_reports: Dict[str, str]) -> ConflictReport:
         compiled_reports = self._format_reports(agent_reports)
         agent_names = list(agent_reports.keys())
         pairs = list(itertools.combinations(agent_names, 2))
         
-        # Programmatically build the step-by-step instructions
         matrix_steps = "\n".join([f"Step {i+1}: Look at reports from {a} and {b} and identify conflicts." for i, (a, b) in enumerate(pairs)])
         
         strategy_instruction = (
@@ -113,7 +111,7 @@ class ConflictChecker(Aggregator):
             f"Step {len(pairs)+1}: Consolidate all findings into a single structured output."
         )
             
-        prompt = self._build_prompt(compiled_reports, strategy_instruction)
+        prompt = self._build_prompt(compiled_reports, strategy_instruction, valid_roles=agent_names)
         
         if self.show_log:
             print(f"[ConflictChecker] Generated dynamic prompt matrix with {len(pairs)} internal comparative steps.")
@@ -134,7 +132,7 @@ class ConflictChecker(Aggregator):
     # =========================================================================
     # STRATEGY 2: Multi-Threaded Parallel Pairs (Multiple Calls, High Accuracy)
     # =========================================================================
-    def _run_parallel_pairwise_audit(self, agent_reports: dict[str, str]) -> ConflictReport:
+    def _run_parallel_pairwise_audit(self, agent_reports: Dict[str, str]) -> ConflictReport:
         master_conflicts = []
         pairs = list(itertools.combinations(agent_reports.items(), 2))
         
@@ -142,17 +140,18 @@ class ConflictChecker(Aggregator):
             print(f"[ConflictChecker] Generated {len(pairs)} unique bilateral combinations for isolation.")
             print(f"[ConflictChecker] Spinning up ThreadPoolExecutor (max_workers={self.max_threads})...")
 
-        logging.info(f"Initiating {len(pairs)} parallel LLM threads for Pairwise Audit...")
+        logger.info(f"Initiating {len(pairs)} parallel LLM threads for Pairwise Audit...")
 
         # Worker function for the thread pool
-        def _check_single_pair(pair) -> list[Conflict]:
+        def _check_single_pair(pair) -> List[Conflict]:
             (agent_a, report_a), (agent_b, report_b) = pair
             pair_dict = {agent_a: report_a, agent_b: report_b}
             compiled_pair = self._format_reports(pair_dict)
             
             prompt = self._build_prompt(
                 compiled_pair, 
-                extra_instruction=f"Focus strictly on direct contradictions between {agent_a} and {agent_b}."
+                extra_instruction=f"Focus strictly on direct contradictions between {agent_a} and {agent_b}.",
+                valid_roles=[agent_a, agent_b]
             )
             
             if self.show_log:
@@ -170,9 +169,9 @@ class ConflictChecker(Aggregator):
                         
                 return result.conflicts if result.has_conflicts else []
             except Exception as e:
-                logging.error(f"Thread failure for {agent_a} vs {agent_b}: {e}")
+                logger.error(f"Thread failure for {agent_a} vs {agent_b}: {str(e)}", exc_info=True)
                 if self.show_log:
-                    print(f"  └── [Thread ERROR] Execution failed for {agent_a} vs {agent_b}: {e}")
+                    print(f"  └── [Thread ERROR] Execution failed for {agent_a} vs {agent_b}: {str(e)}")
                 return []
 
         # Execute threads in parallel
@@ -197,7 +196,13 @@ class ConflictChecker(Aggregator):
     # =========================================================================
     # HELPERS
     # =========================================================================
-    def _build_prompt(self, compiled_reports: str, extra_instruction: str = "") -> str:
+    def _build_prompt(self, compiled_reports: str, extra_instruction: str = "", valid_roles: Optional[List[str]] = None) -> str:
+     
+        role_rule = (
+            f'- The strings inside "involved_agents" MUST be selected strictly from this list of responding experts: {valid_roles}. Do NOT fabricate agent names.'
+            if valid_roles else '- Only include the exact names of the agents participating in the contradiction.'
+        )
+        
         return f"""
         Role: {self.role}
         Goal: {self.goal}
@@ -216,15 +221,19 @@ class ConflictChecker(Aggregator):
                 {{
                     "description": "<string describing the exact contradiction>",
                     "involved_agents": ["<Agent Name 1>", "<Agent Name 2>"],
-                    "severity": "<Critical | Moderate | Minor>" # how severe the contradiction is 
+                    "severity": "<Critical | Moderate | Minor>" // how severe the contradiction is 
                 }}
             ]
         }}
+        
+        CRITICAL RULES FOR 'involved_agents':
+        {role_rule}
+        
         If no conflicts are found, set "has_conflicts": false and "conflicts": [].
         """
 
     def _generate_error_report(self, error: Exception) -> ConflictReport:
-        logging.error(f"ConflictChecker execution failed: {str(error)}")
+        logger.error(f"ConflictChecker execution failed: {str(error)}", exc_info=True)
         return ConflictReport(
             has_conflicts=True,
             conflicts=[Conflict(description=f"System Error: {str(error)}", involved_agents=["System"], severity="Critical")],

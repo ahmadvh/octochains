@@ -1,8 +1,17 @@
+# ==============================================================================
+# Copyright (c) 2026 Ahmad Varasteh (octochains). All rights reserved.
+#
+# Licensed under the Business Source License 1.1 (the "License");
+# you may not use this file except in compliance with the License.
+#
+# ==============================================================================
 import logging
 from typing import Any, Callable, Optional
 from octochains.base import Aggregator
 from octochains.schema import SynthesisResult
 from octochains.utils import parse_and_validate_json
+
+logger = logging.getLogger("octochains")
 
 class Synthesizer(Aggregator):
     """
@@ -31,8 +40,23 @@ class Synthesizer(Aggregator):
         if self.show_log:
             print(f"\n[Synthesizer] Starting execution. Integrating {len(agent_reports)} expert reports...")
 
+        if not agent_reports:
+            error_msg = "No valid expert reports received. All upstream specialist agents failed or timed out."
+            logger.warning(f"[Synthesizer] {error_msg}")
+            if self.show_log:
+                print(f"[Synthesizer WARNING] {error_msg}")
+            
+            return SynthesisResult(
+                narrative=f"Synthesis Aborted: {error_msg}",
+                key_takeaways=["Zero specialist reports available", "Check upstream agent logs"],
+                confidence=0.0,
+                citations={"System": "No valid data to synthesize."}
+            )
+
+
         compiled_reports = self._format_reports(agent_reports)
-        
+        valid_roles = ", ".join([f'"{role}"' for role in agent_reports.keys()])
+
         prompt = f"""
         Role: {self.role}
         Goal: {self.goal}
@@ -40,6 +64,7 @@ class Synthesizer(Aggregator):
         INSTRUCTIONS:
         1. Synthesize the provided expert reports into a single, comprehensive response.
         2. Resolve redundancies and highlight the most critical takeaways.
+        3. ANTI-HALLUCINATION GUARDRAIL: Synthesize strictly and ONLY from the reports provided below. Do NOT assume, infer, or fabricate perspectives for any missing domain specialists.
         
         REPORTS:
         {compiled_reports}
@@ -55,8 +80,9 @@ class Synthesizer(Aggregator):
         }}
 
         CRITICAL DICTIONARY RULES FOR 'citations':
-        - The KEYS of the citations dictionary MUST be the exact names/roles of the agents who provided the reports (e.g., "Global Inventory Analyst", "Director of Logistics").
-        - Do NOT literally write "Agent Role" or "<Insert Actual Agent Role>". Use the real roles.
+        - The KEYS of the citations dictionary MUST be selected strictly from this list of responding agents: [{valid_roles}].
+        - Do NOT literally write "Agent Role" or "<Insert Actual Agent Role>".
+        - Do NOT fabricate citation keys for agents that did not provide a report.
 
         CRITICAL FORMATTING: Do not include any conversational text, markdown formatting, or explanations outside the JSON.
         """
@@ -78,7 +104,7 @@ class Synthesizer(Aggregator):
             
         except Exception as e:
             # 3. Catch ALL errors and return the safe Schema object
-            logging.error(f"Synthesizer execution failed: {str(e)}")
+            logger.error(f"Synthesizer execution failed: {str(e)}")
             
             if self.show_log:
                 print(f"[Synthesizer ERROR] Execution failed: {str(e)}")

@@ -8,16 +8,6 @@
 #     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
 #
 # ==============================================================================
-# ==============================================================================
-# Copyright (c) 2026 Ahmad Varasteh (octochains). All rights reserved.
-#
-# Licensed under the Business Source License 1.1 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
-#
-# ==============================================================================
 import inspect
 from abc import ABC, abstractmethod
 from typing import Dict, List, Callable, Any, Optional

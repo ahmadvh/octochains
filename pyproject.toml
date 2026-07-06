@@ -4,18 +4,30 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "octochains"
-version = "0.4.0"
-description = "A framework for parallel, isolated multi-agent reasoning."
+version = "0.4.1"
+description = "An orchestration framework for reliable multi-agent decision-making, parallel isolated reasoning, and consensus aggregation."
 readme = "README.md"
 license = { text = "BSL-1.1" }
 requires-python = ">=3.9"
 authors = [
     { name="Ahmad", email="ahmad.vh7@gmail.com" }
 ]
+keywords = [
+    "multi-agent",
+    "parallel-reasoning",
+    "llm-orchestration",
+    "ai-agents",
+    "consensus",
+    "fault-tolerance",
+    "pydantic",
+    "model-agnostic",
+    "isolated-execution"
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

@@ -13,7 +13,7 @@ from .engine import Engine
 from .schema import Report, Trace
 from .exceptions import OctochainsError, AgentExecutionError
 
-__version__ = "0.3.1"
+__version__ = "0.4.1"
 __author__ = "Ahmad Varasteh"
 
 __all__ = [

@@ -205,3 +205,110 @@ def test_parse_and_validate_json_missing_keys():
         
     assert "Schema validation failed" in str(excinfo.value)
     assert "score" in str(excinfo.value)
+
+
+from octochains.exceptions import AggregatorError
+
+# ==========================================
+# Additional Mock Classes for Failure Testing
+# ==========================================
+class TotalCrashAgent(Agent):
+    """Simulates a complete agent breakdown."""
+    def __init__(self, role_name: str = "Total Crash Dummy"):
+        super().__init__(role=role_name, goal="Fail unconditionally")
+
+    def execute(self, problem_data: str) -> Any:
+        raise RuntimeError(f"Simulated fatal error in {self.role}")
+
+class FailingAggregator(Aggregator):
+    """Simulates an aggregator crashing during consensus generation."""
+    def __init__(self):
+        super().__init__(
+            role="Broken Chief Officer", 
+            goal="Fail during synthesis",
+            llm_callable=None
+        )
+
+    def execute(self, agent_reports: Dict[str, str]) -> Any:
+        raise ValueError("Simulated LLM synthesis failure")
+
+class VerifyingAggregator(Aggregator):
+    """An aggregator that records exactly what reports it received for assertion."""
+    def __init__(self):
+        super().__init__(
+            role="Verifying Officer", 
+            goal="Verify received report keys",
+            llm_callable=None
+        )
+        self.received_keys = []
+
+    def execute(self, agent_reports: Dict[str, str]) -> Any:
+        self.received_keys = list(agent_reports.keys())
+        return f"Consensus built on: {', '.join(self.received_keys)}"
+
+
+# ==========================================
+# 7. Extended Fault Tolerance & Resilience Tests
+# ==========================================
+def test_engine_isolates_failures_from_aggregator():
+    """
+    Ensures that when an agent fails, its error is excluded from the valid reports
+    sent to the aggregator, but is still preserved in the audit traces.
+    """
+    success_agent = MockAgent()
+    failing_agent = FailingAgent()
+    aggregator = VerifyingAggregator()
+
+    engine = Engine(agents=[success_agent, failing_agent], aggregator=aggregator)
+    result = engine.run("Test Problem", show_log=False)
+
+    # 1. Verify the aggregator ONLY received the successful agent's report
+    assert "Risk Specialist" in aggregator.received_keys
+    assert "Crash Dummy" not in aggregator.received_keys
+    assert result.consensus == "Consensus built on: Risk Specialist"
+
+    # 2. Verify the audit trail captures both the success and the specific error
+    assert len(result.traces) == 2
+    
+    success_trace = next(t for t in result.traces if t.agent_role == "Risk Specialist")
+    error_trace = next(t for t in result.traces if t.agent_role == "Crash Dummy")
+
+    assert success_trace.status == "success"
+    assert success_trace.error_message is None
+    assert error_trace.status == "error"
+    assert "Simulated API Timeout" in error_trace.error_message
+
+
+def test_engine_raises_error_on_total_agent_failure():
+    """
+    Tests that if ALL agents fail, the engine halts immediately and raises
+    an AggregatorError instead of executing the aggregator with empty reports.
+    """
+    agent1 = TotalCrashAgent("Crash Dummy 1")
+    agent2 = TotalCrashAgent("Crash Dummy 2")
+    aggregator = MockAggregator()
+
+    engine = Engine(agents=[agent1, agent2], aggregator=aggregator)
+
+    # The engine should raise an AggregatorError when zero valid reports exist
+    with pytest.raises(AggregatorError) as excinfo:
+        engine.run("Test Problem", show_log=False)
+
+    assert "All parallel specialist agents failed" in str(excinfo.value)
+
+
+def test_engine_wraps_aggregator_failure():
+    """
+    Tests that if specialist agents succeed but the aggregator fails during synthesis,
+    the error is cleanly caught and wrapped in an AggregatorError.
+    """
+    agent = MockAgent()
+    failing_aggregator = FailingAggregator()
+
+    engine = Engine(agents=[agent], aggregator=failing_aggregator)
+
+    with pytest.raises(AggregatorError) as excinfo:
+        engine.run("Test Problem", show_log=False)
+
+    assert "The aggregator 'Broken Chief Officer' failed to execute" in str(excinfo.value)
+    assert "Simulated LLM synthesis failure" in str(excinfo.value)
