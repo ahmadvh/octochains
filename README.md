@@ -8,7 +8,7 @@
   <img src="https://github.com/user-attachments/assets/93aecdbf-10af-4f32-9cf3-18a0547d494a" alt="Octochains Logo" width="40%" style="max-width:260px; min-width:150px;"/>
 </p>
 
-**Octochains** is a zero-dependency Python framework for **fault-tolerant, parallel, and isolated multi-agent reasoning and consensus**. It is purpose-built for complex, decomposable tasks that require independent, multi-perspective analysis without logical contamination.
+**Octochains** is a zero-dependency Python framework for **parallel, and isolated multi-agent reasoning and consensus**. It is purpose-built for complex, decomposable tasks that require independent, multi-perspective analysis without logical contamination.
 
 Unlike traditional sequential agent chains where models bias each other through shared chat histories, Octochains executes domain specialists in **Parallel Isolated Threads**. Every angle of a high-stakes decision, from clinical diagnostics to financial risk and legal audits, is evaluated in pristine isolation before being synthesized by a centralized verification layer.
 
