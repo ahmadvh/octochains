@@ -3,18 +3,16 @@
 #
 # Licensed under the Business Source License 1.1 (the "License");
 # you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
 #
 # ==============================================================================
-import inspect
+
 from abc import ABC, abstractmethod
 from typing import Dict, List, Callable, Any, Optional
 import json
 import re
 from dataclasses import is_dataclass, asdict
 from pydantic import BaseModel 
+from .skills import Skill
 
 # Define the custom type alias for the framework
 # The callable takes a string prompt, but can return anything (String, Dict, Object)
@@ -31,7 +29,8 @@ class Agent(ABC):
                  role: str, 
                  goal: str, 
                  input_description: Optional[str] = None,
-                 llm_callable: Optional[LLMCallable] = None):
+                 llm_callable: Optional[LLMCallable] = None,
+                 skills: Optional[List['Skill']] = None):
         """
         Initializes the Agent.
         
@@ -40,11 +39,55 @@ class Agent(ABC):
             goal: What this agent is trying to achieve.
             input_description: A short description of the input data. 
             llm_callable: A model-agnostic execution function. 
+            skills: A list of granular procedural markdown skills.
         """
+        # Fail-fast check to prevent silent thread crashes and enforce BYO-LLM
+        if skills and llm_callable is None:
+            raise ValueError(
+                f"Agent '{role}' requires an llm_callable because it has skills "
+                "attached (skill routing needs an LLM to select relevant guidance). "
+                "Pass llm_callable=..., or construct this agent without skills."
+            )
+
         self.role = role
         self.goal = goal
         self.input_description = input_description
         self.llm_callable = llm_callable
+        self.skills = skills or []
+
+    def _skill_index(self) -> str:
+        """Returns a progressive-disclosure summary of available skills."""
+        if not self.skills:
+            return ""
+        
+        index_lines = ["\n            === AVAILABLE SKILLS ==="]
+        for skill in self.skills:
+            index_lines.append(f"            - {skill.name}: {skill.description}")
+        return "\n".join(index_lines)
+
+    def get_skill(self, name: str) -> Optional['Skill']:
+        """Retrieves a specific skill by its strictly defined name."""
+        for skill in self.skills:
+            if skill.name == name:
+                return skill
+        return None
+
+    def load_relevant_skills(self, problem_data: str) -> str:
+        """
+        Retrieves the full content of relevant skills. 
+        For highly granular presets, this safely formats all injected skills.
+        Can be overridden in subclasses for LLM-based dynamic routing if needed.
+        """
+        if not self.skills:
+            return ""
+        
+        context_lines = []
+        for skill in self.skills:
+            context_lines.append(f"--- SKILL: {skill.name} (v{skill.version}) ---")
+            context_lines.append(skill.content)
+            context_lines.append("-" * 40)
+            
+        return "\n".join(context_lines)
 
     def _build_prompt(self, problem_data: str) -> str:
         """
@@ -58,7 +101,7 @@ class Agent(ABC):
 
             === YOUR IDENTITY ===
             Role: {self.role}
-            Goal: {self.goal}
+            Goal: {self.goal}{self._skill_index()}
 
             === YOUR TASK ===
             Input Description: {self.input_description or "Unstructured context data."}

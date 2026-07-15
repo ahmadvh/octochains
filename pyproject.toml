@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "octochains"
-version = "0.4.1"
+version = "0.5.0"
 description = "An orchestration framework for reliable multi-agent decision-making, parallel isolated reasoning, and consensus aggregation."
 readme = "README.md"
 license = { text = "BSL-1.1" }
@@ -39,7 +39,6 @@ classifiers = [
 
 dependencies = [
     "pydantic>=2.0.0",
-    "python-dotenv>=1.0.0"
 ]
 
 [project.optional-dependencies]
@@ -60,3 +59,4 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 octochains = ["*.py"]
+"octochains.agents.skills" = ["**/*.md"]

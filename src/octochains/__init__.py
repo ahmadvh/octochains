@@ -3,18 +3,18 @@
 #
 # Licensed under the Business Source License 1.1 (the "License");
 # you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://github.com/ahmadvh/octochains/blob/main/LICENSE.md
 #
 # ==============================================================================
+
+__version__ = "0.5.0"
+__author__ = "Ahmad Varasteh"
+
 from .base import Agent, Aggregator
 from .engine import Engine
 from .schema import Report, Trace
 from .exceptions import OctochainsError, AgentExecutionError
-
-__version__ = "0.4.1"
-__author__ = "Ahmad Varasteh"
+from .skills import Skill
+from .agents import SkilledAgent
 
 __all__ = [
     "Agent", 
@@ -23,5 +23,7 @@ __all__ = [
     "Report", 
     "Trace", 
     "OctochainsError", 
-    "AgentExecutionError"
+    "AgentExecutionError",
+    "Skill",
+    "SkilledAgent",
 ]

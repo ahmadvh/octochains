@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+## [0.5.0] - 2026-07-14
+
+### Added
+
+#### Zero-Dependency Skills Engine
+Introduced the `Skill` and `SkilledAgent` classes to parse domain expertise and operational procedure directly from structured Markdown (`SKILL.md`) files. Features a native frontmatter parser for metadata (`name`, `description`, `version`) that operates entirely on the Python standard library, requiring no external YAML dependencies.
+
+#### Regulatory & Compliance Auditors
+Shipped a catalog of out-of-the-box legal presets (`data_sovereignty_auditor`, `ai_risk_assessor`, `phi_sanitizer`, `licensing_reviewer`) powered by the new Skills Engine. These agents are strictly configured to flag GDPR cross-border violations, EU AI Act risk tiers, PHI mishandling, and copyleft licensing contamination.
+
+#### Executive Due-Diligence Board (C-Suite)
+Introduced adversarial strategy presets (`cfo_agent`, `cto_agent`, `cro_agent`, `cpo_agent`, `cmo_agent`) designed for parallel M&A and business case evaluation. Each preset isolates the LLM's attention budget to a single executive domain (e.g., tech debt vs. runway analysis) to prevent cognitive bias and semantic distraction.
+
+### Changed
+
+#### Beta Promotion & Package Maturity
+Upgraded the project maturity Trove Classifier to `Development Status :: 4 - Beta` in `pyproject.toml` to accurately reflect the framework's stability and enterprise-readiness while reserving the right for minor API iterations prior to v1.0.0.
+
+### Fixed
+
+#### Package Data Resolution & Integrity
+Configured `setuptools` package-data discovery in `pyproject.toml` (`**/*.md`) to guarantee all bundled `SKILL.md` knowledge packs are successfully included in the built wheel. Integrated `importlib.resources` within the preset factories to flawlessly locate and load these files regardless of the host environment's execution path.
+
+---
 ## [0.4.1] - 2026-07-07
 
 ### Added
