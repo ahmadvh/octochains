@@ -7,7 +7,7 @@ from octochains.agents.skilled_agent import SkilledAgent
 from octochains.agents import presets
 from octochains.agents.presets import (
     cfo_agent, cto_agent, cro_agent, cpo_agent, cmo_agent,
-    data_sovereignty_auditor, ai_risk_assessor, phi_sanitizer, licensing_reviewer,
+    data_sovereignty_auditor, ai_risk_assessor, phi_sanitizer, licensing_reviewer,security_threat_hunter,
 )
 
 
@@ -25,7 +25,7 @@ def simple_llm(prompt: str) -> str:
 
 ALL_PRESET_FACTORIES = [
     cfo_agent, cto_agent, cro_agent, cpo_agent, cmo_agent,
-    data_sovereignty_auditor, ai_risk_assessor, phi_sanitizer, licensing_reviewer,
+    data_sovereignty_auditor, ai_risk_assessor, phi_sanitizer, licensing_reviewer,security_threat_hunter,
 ]
 
 EXPECTED_ROLES = {
@@ -38,6 +38,7 @@ EXPECTED_ROLES = {
     ai_risk_assessor: "AI Risk Assessor",
     phi_sanitizer: "Health Data Compliance Officer",
     licensing_reviewer: "Open-Source Compliance Engineer",
+    security_threat_hunter: "Security Threat Hunter",
 }
 
 
