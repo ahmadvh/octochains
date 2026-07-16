@@ -7,97 +7,85 @@ First off, thank you for considering contributing to Octochains! It’s people l
 ### Contribution Workflow
 
 1. Fork the repository and create your branch from `main`.
-
-2. Code your contribution following the directory standards below.
-
-3. Test your agent or demo in an isolated environment.
-
-4. Submit a Pull Request (PR). Note that all PRs are personally vetted for logic, safety, and architectural fit.
+2. Code your contribution following the standards below.
+3. Test your Agent, Skill, or Aggregator locally (see testing notes below).
+4. Submit a Pull Request. By submitting, you agree to the licensing terms in the [Licensing of Contributions](#licensing-of-contributions) section below.
+5. All PRs are personally vetted for logic, safety, and architectural fit.
 
 ---
 
-### The "Zero-Dependency" Golden Rule
+### The Minimal-Dependency Rule
 
-**Octochains must remain lightweight.**
+**Octochains stays lightweight.** The core framework (`src/octochains`) has exactly one dependency: **Pydantic**. Skill parsing (`skills.py`) is deliberately hand-rolled stdlib — no YAML library — to keep that count at one.
 
-**Do NOT** submit Pull Requests that add heavy ML SDKs (`langchain`, `llama-index`, `openai`, `anthropic`, `transformers`, etc.) to the `requirements.txt` or `pyproject.toml`.
+**Do NOT** add heavy ML SDKs (`langchain`, `llama-index`, `openai`, `anthropic`, `transformers`, etc.) to `pyproject.toml`.
 
-The core framework (`src/octochains`) must only rely on standard Python libraries.
-
-If you are building an integration, demo, or specific wrapper, place it in the `demo-examples/` directory where users can choose to install those dependencies themselves.
+If you're building an integration, demo, or specific LLM wrapper, place it in `demo-examples/` where users opt into those dependencies themselves.
 
 ---
 
-### The Hub Architecture
+### 1. Adding a New Official Agent Preset
 
-Octochains uses a Package Registry system. To ensure users can use clean shorthand imports, every new component must be registered.
+Official agents in Octochains are built from two pieces: a **Skill** (the domain knowledge, as a markdown file) and a **preset factory function** (the wiring). You do not need to write a new `Agent` subclass — `SkilledAgent` already handles execution.
 
+**Step 1 — Write the Skill.**
+Create a new folder under `src/octochains/agents/skills/<domain>/<skill-name>/SKILL.md`. Required frontmatter fields: `name`, `description`. Optional: `version`.
+
+```markdown
+---
+name: your-skill-name
+description: One sentence describing what this skill teaches the agent.
+version: 1.0.0
 ---
 
-### 1. Adding a New Agent
-
-Agents live in domain-specific folders inside `src/octochains/agents/`.
-
-### Placement
-
-Create a new `.py` file in an existing domain folder (e.g., `medical/`) or create a new domain folder if it doesn't exist.
-
-### Requirements
-
-- Inherit from the `octochains.Agent` base class.
-- Define a clear `role`, `goal`, and `input_description` in `super().__init__`.
-- **Dependency Injection:** Do not hardcode LLM calls inside your agent. Your agent must accept `llm_callable` in its `__init__` and pass it to the base class.
-- Implement the `execute(self, problem_data: str) -> Any` method.
-- Use `self._build_prompt(problem_data)` to automatically inject the double-blind isolation instructions and `@tool` schemas.
-
-### Registration (Crucial)
-
-You must update the `__init__.py` inside your domain folder to export your agent.
-
-```python
-# src/octochains/agents/medical/__init__.py
-
-from .your_new_file import YourAgentClass
+## Your Skill Title
+1. Step-by-step domain guidance goes here...
 ```
 
----
+Rules for Skill content:
+- **Provider-agnostic.** No vendor-specific prompting tricks, no assumptions about a particular model's context window.
+- **Markdown only — no bundled scripts or executable code.** This is a hard rule; skills that execute code are a supply-chain risk we don't accept.
+- Frontmatter is flat `key: value` pairs only — no nested lists or objects (our parser is intentionally simple, by design, to avoid a YAML dependency).
 
-### 2. Adding a New Aggregator
-
-Aggregators live in `src/octochains/aggregators/`.
-
-## Placement
-
-Create your logic file in the `aggregators` directory.
-
-## Requirements
-
-- Inherit from `octochains.Aggregator`.
-- Aggregators process a dictionary of reports (`Dict[str, str]`).
-- **Structured Outputs:** Aggregators return `Any`. You are highly encouraged to build aggregators that return clean JSON dictionaries or Pydantic models for API readiness.
-
----
-
-### 💡 Example: Creating a Cybersecurity Agent
-
-Here is how a typical "Expert" agent should look. This example uses a `@tool` and follows the updated Octochains BYO-LLM standard:
+**Step 2 — Register the preset factory.**
+Add a function to `src/octochains/agents/presets.py` following the existing pattern:
 
 ```python
-from octochains import Agent, tool
+def your_agent(llm_callable: LLMCallable, extra_skills: Optional[List[Skill]] = None) -> SkilledAgent:
+    base_skills = _load_skills("octochains.agents.skills.<domain>", "your-skill-name")
+    return SkilledAgent(
+        role="Your Agent's Persona",
+        goal="What this agent is trying to achieve.",
+        input_description="What kind of input data this agent expects.",
+        llm_callable=llm_callable,
+        skills=base_skills + (extra_skills or [])
+    )
+```
+
+**Step 3 — Register the package data.**
+If this is a new domain folder, add it to `pyproject.toml`'s `package-data` so the SKILL.md ships inside the built wheel.
+
+**Step 4 — Tests.**
+At minimum: the preset raises without `llm_callable`, ships with the skill attached, has a non-empty `role`/`goal`, and correctly merges `extra_skills`. See `tests/test_presets.py` for the pattern.
+
+**Step 5 — Docs.**
+Add a row to the appropriate table in `README.md` under "Official Preset Agents."
+
+---
+
+### 2. Building a Fully Custom Agent (not a preset)
+
+If your contribution needs custom execution logic beyond prompting — live API calls, custom tool-calling, a different output structure — subclass `Agent` directly instead of using a preset:
+
+```python
+from octochains.base import Agent
 from typing import Callable, Any
 
 
 class NetworkSecurityAgent(Agent):
-    """
-    This agent specializes in scanning network logs for unauthorized
-    access attempts and firewall misconfigurations.
-    """
+    """Scans network logs for unauthorized access attempts and misconfigurations."""
 
     def __init__(self, llm_callable: Callable[[str], Any]):
-
-        # 1. Define the Identity:
-        # This is passed to the base class prompt builder
-
         super().__init__(
             role="Network Security Specialist",
             goal="Identify active intrusion patterns and open-port vulnerabilities.",
@@ -105,144 +93,81 @@ class NetworkSecurityAgent(Agent):
             llm_callable=llm_callable
         )
 
-    @tool
-    def check_port_status(self, port: int) -> str:
-        """
-        Queries the system firewall for the status of a specific port.
-
-        Args:
-            port: The network port number to check (e.g., 22, 80).
-        """
-
-        # Logic for the tool goes here
-
-        protected_ports = [22, 3389]
-
-        if port in protected_ports:
-            return f"Port {port} is OPEN and vulnerable."
-
-        return f"Port {port} is closed/secured."
-
     def execute(self, problem_data: str) -> Any:
-        """
-        The 'problem_data' parameter is the full complex problem
-        broadcasted by the Engine.
-        """
-
-        # 2. The base class automatically builds the prompt
-        # and injects the check_port_status tool schema!
-
+        # self._build_prompt() gives you the strict isolated identity prompt.
+        # You own everything else — custom tool schemas, API calls, parsing.
         prompt = self._build_prompt(problem_data)
-
-        # 3. Execute using the user's provided LLM
-
         return self.llm_callable(prompt)
 ```
+
+These are contributed as standalone examples in `demo-examples/`, not registered as official presets, unless a maintainer explicitly agrees to adopt one into the core catalog.
+
+---
+
+### 3. Adding a New Official Aggregator
+
+Aggregators live in `src/octochains/aggregators/`.
+
+**Requirements:**
+- Inherit from `octochains.Aggregator`.
+- Process a `Dict[str, str]` of agent reports via `self._format_reports(...)`.
+- Define a Pydantic output schema in `schema.py` (see `ConflictReport` as a reference) using `model_config = ConfigDict(extra='ignore')` so hallucinated LLM keys don't crash validation.
+- Handle the "insufficient input" edge case explicitly — see `ConflictChecker`'s mathematical safety gate (aborts cleanly if fewer than 2 valid reports arrive) for the expected pattern.
+- Export it from `src/octochains/aggregators/__init__.py`.
+- Add tests covering: normal execution, malformed LLM output, and your insufficient-input edge case.
+- Add a section to `README.md` under "Official Enterprise Aggregators."
 
 ---
 
 ### Creating Demo Examples
 
-Demos are the best way to show Octochains in action.
+Demos are the best way to show Octochains in action, and the place for anything that needs a heavier dependency (an LLM SDK, `pandas`, etc.).
 
-To keep the core framework lightweight, we enforce **Strict Demo Isolation**.
-
-## Placement
-
-Create a numbered folder in `demo-examples/`.
-
-Example:
-
-```plaintext
-demo-examples/02-cybersecurity-threat-hunt
+**Structure:**
 ```
-
-## Structure
-
-```plaintext
-demo-examples/XX-your-demo/
-├── requirements.txt  <-- MANDATORY: List all demo-specific libraries
-├── run_demo.py       <-- MANDATORY: The entry point for the demo
-└── README.md         <-- Optional: Explain the use case
+cookbook/XX-your-demo/
+├── requirements.txt   <-- MANDATORY: demo-specific libraries
+├── run_demo.py        <-- MANDATORY: entry point
+└── README.md          <-- optional: explain the use case
 ```
-
-### The Dependency Rule
-
-If your demo requires libraries not found in the core `octochains` package (like `pandas`, `litellm`, or `biopython`), they must be listed in your demo's `requirements.txt`.
-
-❌ Do not add them to the core `pyproject.toml`. 
+❌ Never add demo-specific dependencies to the core `pyproject.toml`.
 
 ---
 
-# Code Standards
-
-To keep the Octochains codebase clean and maintainable for everyone, please adhere to the following standards.
-
----
+## Code Standards
 
 ### Threading Safety
-
-⚠️ **Critical:** Agents in Octochains run in parallel threads.
-
-Avoid using:
-- Global state
-- Mutable module-level variables
-- Non-thread-safe resources within an Agent's `execute` method
-
-Your code should be **Stateless** relative to other agents.
-
----
+⚠️ **Critical:** Agents run in parallel threads via `Engine`. Avoid global state, mutable module-level variables, or non-thread-safe resources inside `execute()`. Your code should be stateless relative to other agents.
 
 ### Type Hinting
+All public methods and function signatures need type hints. Use `LLMCallable` (`Callable[[str], Any]`) for model execution parameters.
 
-We follow modern Python practices.
-
-All public methods and function signatures must include Python type hints.
-
-Use our custom `LLMCallable` alias (`Callable[[str], Any]`) for model execution parameters.
-
----
-
-## Documentation
-
-We prioritize clarity.
-
-Include descriptive docstrings for:
-- All classes
-- All `@tool` methods
-
-Remember:
-The text in your tool's docstring is what the LLM uses to understand how to call it.
-
----
+### Documentation
+Every class needs a docstring. Be descriptive — docstrings are read by contributors, not by the LLM (unlike the Skill markdown content, which the model does read).
 
 ### Error Handling
-
-Never let a failed LLM call crash the Engine.
-
-Rely on the `format_output` safety nets in the base classes to prevent dictionary mapping crashes.
+Never let a failed LLM call crash the Engine. Rely on `format_output()`'s existing safety nets rather than adding new ad hoc exception handling.
 
 ---
 
 ### Licensing of Contributions
 
-Octochains operates under a Fair-Code model.
+Octochains operates under a Fair-Code model, distributed under the **Business Source License 1.1** (see [LICENSE.md](LICENSE.md) for the full commercial-use restriction and 2030 sunset date).
 
-By submitting a contribution to this repository, you agree to the following:
+By submitting a pull request to this repository, you agree to the following:
 
-**BSL 1.1 Licensing**
+- You wrote the contribution yourself, or otherwise have the right to submit it under these terms.
+- You grant Ahmad Varasteh (Octochains) permission to license your contribution under BSL 1.1, or any future terms he chooses, in order to keep the project's licensing consistent and sustainable.
+- Your contribution comes as-is, without warranty of any kind, and you won't be liable for any damages related to it, to the extent the law allows.
+- You acknowledge your contribution will automatically transition to Apache License 2.0 alongside the rest of the codebase on the project's Change Date (May 10, 2030).
 
-You agree that your contributions will be licensed under the Business Source License 1.1. This allows the project to remain sustainable while keeping the source code public and free for most users.
-
-**Automatic Open Source Transition**
-
-You acknowledge and agree that your contributions will automatically transition to the Apache License, Version 2.0, upon the project's predefined Change Date (the 4-year sunset). This structure ensures that while we protect the engine's development today, your work is guaranteed to eventually become part of a fully open-source public good.
+No separate signature or paperwork is required — submitting a PR constitutes agreement to these terms.
 
 ---
 
 ### Questions?
 
-If you have questions about where a specific expert belongs in the Hub or need help with the threading logic, feel free to open an Issue or reach out directly to the maintainer:
+Open an Issue, or reach out directly:
 
 📩 ahmad.vh7@gmail.com
 
