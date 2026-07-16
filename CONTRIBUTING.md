@@ -20,7 +20,7 @@ First off, thank you for considering contributing to Octochains! It’s people l
 
 **Do NOT** add heavy ML SDKs (`langchain`, `llama-index`, `openai`, `anthropic`, `transformers`, etc.) to `pyproject.toml`.
 
-If you're building an integration, demo, or specific LLM wrapper, place it in `demo-examples/` where users opt into those dependencies themselves.
+If you're building an integration, demo, or specific LLM wrapper, place it in `cookbook/` where users opt into those dependencies themselves.
 
 ---
 
