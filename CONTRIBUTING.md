@@ -100,7 +100,7 @@ class NetworkSecurityAgent(Agent):
         return self.llm_callable(prompt)
 ```
 
-These are contributed as standalone examples in `demo-examples/`, not registered as official presets, unless a maintainer explicitly agrees to adopt one into the core catalog.
+These are contributed as standalone examples in `cookbooks/`, not registered as official presets, unless a maintainer explicitly agrees to adopt one into the core catalog.
 
 ---
 
