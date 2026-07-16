@@ -83,7 +83,17 @@ def licensing_reviewer(llm_callable: LLMCallable, extra_skills: Optional[List[Sk
         llm_callable=llm_callable,
         skills=base_skills + (extra_skills or [])
     )
-
+    
+def security_threat_hunter(llm_callable: LLMCallable, extra_skills: Optional[List[Skill]] = None) -> SkilledAgent:
+    base_skills = _load_skills("octochains.agents.skills.security", "threat-intel-triage")
+    return SkilledAgent(
+        role="Security Threat Hunter",
+        goal="Identify indicators of compromise, anomalous network and endpoint behavior, and active intrusion patterns from the provided data.",
+        input_description="Network logs, endpoint activity reports, or firewall/IDS configuration data.",
+        llm_callable=llm_callable,
+        skills=base_skills + (extra_skills or [])
+    )
+    
 def cfo_agent(llm_callable: LLMCallable, extra_skills: Optional[List[Skill]] = None) -> SkilledAgent:
     base_skills = _load_skills("octochains.agents.skills.strategy", "runway-burn-analysis")
     return SkilledAgent(
