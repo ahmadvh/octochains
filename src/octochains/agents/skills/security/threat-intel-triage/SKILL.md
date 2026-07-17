@@ -1,7 +1,8 @@
-| name | threat-intel-triage |
-|------|----------------------|
-| description | Identifies indicators of compromise, anomalous activity, and potential attack or intrusion patterns from network and endpoint data. |
-| version | 1.0.0 |
+---
+name: threat-intel-triage
+description: Identifies indicators of compromise, anomalous network/endpoint behavior, and active intrusion patterns from the provided data.
+version: 1.0.0
+---
 
 ## Objective
 
