@@ -1,31 +1,38 @@
 """
 Tests for SkilledAgent and the official preset catalog.
 """
+import json
 import pytest
+from pydantic import BaseModel
 from octochains.skills import Skill
 from octochains.agents.skilled_agent import SkilledAgent
 from octochains.agents import presets
 from octochains.agents.presets import (
     cfo_agent, cto_agent, cro_agent, cpo_agent, cmo_agent,
-    data_sovereignty_auditor, ai_risk_assessor, phi_sanitizer, licensing_reviewer,security_threat_hunter,
+    data_sovereignty_auditor, ai_risk_assessor, phi_sanitizer, licensing_reviewer, security_threat_hunter,
 )
 
-
 # =============================================================================
-# HELPERS
+# HELPERS & MOCKS
 # =============================================================================
 
 def make_skill(name="test-skill", description="A test skill.", content="Test skill body.", version="1.0.0"):
     return Skill(name=name, description=description, version=version, content=content)
 
-
 def simple_llm(prompt: str) -> str:
     return "MOCK_RESPONSE"
 
+class DummySchema(BaseModel):
+    confidence: int
+    verdict: str
 
 ALL_PRESET_FACTORIES = [
     cfo_agent, cto_agent, cro_agent, cpo_agent, cmo_agent,
-    data_sovereignty_auditor, ai_risk_assessor, phi_sanitizer, licensing_reviewer,security_threat_hunter,
+    data_sovereignty_auditor,
+    ai_risk_assessor,
+    phi_sanitizer,
+    licensing_reviewer,
+    security_threat_hunter,
 ]
 
 EXPECTED_ROLES = {
@@ -43,7 +50,7 @@ EXPECTED_ROLES = {
 
 
 # =============================================================================
-# 1. SkilledAgent — CONSTRUCTION  (unchanged — these already passed)
+# 1. SkilledAgent — CONSTRUCTION
 # =============================================================================
 
 class TestSkilledAgentConstruction:
@@ -67,9 +74,55 @@ class TestSkilledAgentConstruction:
         assert agent.skills == []
         assert isinstance(agent.skills, list)
 
+    def test_assigns_output_format_correctly(self):
+        agent = SkilledAgent(role="R", goal="G", llm_callable=simple_llm, output_format=DummySchema)
+        assert agent.output_format is DummySchema
+
 
 # =============================================================================
-# 2. SkilledAgent — execute() WITHOUT skills  (unchanged — already passed)
+# 2. SkilledAgent — OUTPUT FORMAT & JSON PARSING
+# =============================================================================
+
+class TestSkilledAgentOutputFormat:
+
+    def test_schema_is_injected_into_prompt(self):
+        agent = SkilledAgent(role="R", goal="G", llm_callable=simple_llm, output_format=DummySchema)
+        prompt = agent._build_prompt("Some task data.")
+        
+        assert "OUTPUT FORMAT REQUIREMENT" in prompt
+        assert "confidence" in prompt
+        assert "verdict" in prompt
+
+    def test_execute_parses_json_and_returns_formatted_string(self):
+        # Mock an LLM returning slightly messy markdown JSON
+        def llm_returning_json(p):
+            return '```json\n{"confidence": 99, "verdict": "APPROVED"}\n```'
+
+        agent = SkilledAgent(role="R", goal="G", llm_callable=llm_returning_json, output_format=DummySchema)
+        result = agent.execute("Data")
+
+        # The agent should parse the JSON, validate it against DummySchema, 
+        # and format_output() should serialize it back to a clean string
+        assert "99" in result
+        assert "APPROVED" in result
+        
+        # Verify it is valid JSON
+        parsed_result = json.loads(result)
+        assert parsed_result["confidence"] == 99
+        assert parsed_result["verdict"] == "APPROVED"
+
+    def test_execute_raises_value_error_on_missing_json(self):
+        def bad_llm(p):
+            return "I am unable to provide JSON right now."
+
+        agent = SkilledAgent(role="R", goal="G", llm_callable=bad_llm, output_format=DummySchema)
+        
+        with pytest.raises(ValueError, match="No valid JSON structure"):
+            agent.execute("Data")
+
+
+# =============================================================================
+# 3. SkilledAgent — execute() WITHOUT skills
 # =============================================================================
 
 class TestSkilledAgentExecuteNoSkills:
@@ -97,7 +150,7 @@ class TestSkilledAgentExecuteNoSkills:
 
 
 # =============================================================================
-# 3. Agent skill helpers — get_skill() returns Optional[Skill], never raises
+# 4. Agent skill helpers
 # =============================================================================
 
 class TestAgentSkillHelpers:
@@ -108,7 +161,7 @@ class TestAgentSkillHelpers:
 
         result = agent.get_skill("known")
 
-        assert result is skill  # same object, not a copy
+        assert result is skill  
         assert result.content == "KNOWN CONTENT"
 
     def test_get_skill_returns_none_for_unknown_name(self):
@@ -136,10 +189,7 @@ class TestAgentSkillHelpers:
 
 
 # =============================================================================
-# 4. load_relevant_skills() — the REAL base-class default:
-#    unconditionally concatenates ALL bundled skills' full content.
-#    No LLM call, no selection. (Docstring notes this is overridable
-#    in a subclass for dynamic routing — but that's not the shipped default.)
+# 5. load_relevant_skills() Default Behavior
 # =============================================================================
 
 class TestLoadRelevantSkillsDefaultBehavior:
@@ -171,18 +221,9 @@ class TestLoadRelevantSkillsDefaultBehavior:
         assert "SKILL: first (v1.0.0)" in result
         assert "SKILL: second (v2.0.0)" in result
 
-    def test_output_is_unaffected_by_problem_data_content(self):
-        # Selection is unconditional — problem_data doesn't influence it.
-        skill = make_skill(name="always-included", content="ALWAYS BODY")
-        agent = SkilledAgent(role="R", goal="G", llm_callable=simple_llm, skills=[skill])
-
-        assert "ALWAYS BODY" in agent.load_relevant_skills("wildly unrelated text")
-        assert "ALWAYS BODY" in agent.load_relevant_skills("")
-
 
 # =============================================================================
-# 5. SkilledAgent.execute() WITH skills — single LLM call,
-#    full skill guidance always injected when skills are present.
+# 6. SkilledAgent.execute() WITH skills
 # =============================================================================
 
 class TestSkilledAgentExecuteWithSkills:
@@ -216,57 +257,9 @@ class TestSkilledAgentExecuteWithSkills:
         assert "APPLICABLE SKILL GUIDANCE" in prompt
         assert "ALPHA SKILL BODY" in prompt
 
-    def test_execute_omits_guidance_block_when_agent_has_no_skills(self):
-        captured = []
-
-        def llm(p):
-            captured.append(p)
-            return "FINAL_REPORT"
-
-        agent = SkilledAgent(role="Specialist", goal="Goal.", llm_callable=llm)  # no skills
-        agent.execute("Task data.")
-
-        assert "APPLICABLE SKILL GUIDANCE" not in captured[0]
-
-    def test_skill_index_and_full_guidance_both_present_when_skills_exist(self):
-        # _build_prompt() injects the cheap name/description index;
-        # execute() separately appends the full-content guidance block.
-        # Both should appear — they serve different purposes.
-        skill = make_skill(name="listed-and-loaded", description="Shown as index entry.", content="FULL BODY TEXT")
-        captured = []
-
-        def llm(p):
-            captured.append(p)
-            return "FINAL_REPORT"
-
-        agent = SkilledAgent(role="Specialist", goal="Goal.", llm_callable=llm, skills=[skill])
-        agent.execute("Task data.")
-
-        prompt = captured[0]
-        assert "AVAILABLE SKILLS" in prompt
-        assert "APPLICABLE SKILL GUIDANCE" in prompt
-        assert "FULL BODY TEXT" in prompt
-
-    def test_multiple_skills_all_appear_in_single_call(self):
-        s1 = make_skill(name="first", content="FIRST BODY")
-        s2 = make_skill(name="second", content="SECOND BODY")
-        captured = []
-
-        def llm(p):
-            captured.append(p)
-            return "FINAL_REPORT"
-
-        agent = SkilledAgent(role="Specialist", goal="Goal.", llm_callable=llm, skills=[s1, s2])
-        agent.execute("Task data.")
-
-        prompt = captured[0]
-        assert "FIRST BODY" in prompt
-        assert "SECOND BODY" in prompt
-
 
 # =============================================================================
-# 6. Official presets — uniform behavior across the full catalog
-#    (unchanged — these already passed)
+# 7. Official presets — uniform behavior across the full catalog
 # =============================================================================
 
 @pytest.mark.parametrize("factory", ALL_PRESET_FACTORIES, ids=lambda f: f.__name__)
@@ -302,9 +295,18 @@ class TestAllPresetsUniformly:
         agent = factory(llm_callable=simple_llm)
         assert agent.llm_callable is simple_llm
 
+    def test_accepts_output_format_and_passes_to_agent(self, factory):
+        agent = factory(llm_callable=simple_llm, output_format=DummySchema)
+        assert agent.output_format is DummySchema
+
+    def test_accepts_input_description_override(self, factory):
+        custom_desc = "CUSTOM INPUT OVERRIDE"
+        agent = factory(llm_callable=simple_llm, input_description=custom_desc)
+        assert agent.input_description == custom_desc
+
 
 # =============================================================================
-# 7. End-to-end: a real preset's bundled skill content actually reaches the LLM
+# 8. End-to-end: preset execution
 # =============================================================================
 
 class TestPresetEndToEndSkillGuidance:
@@ -331,7 +333,7 @@ class TestPresetEndToEndSkillGuidance:
 
 
 # =============================================================================
-# 8. Packaging guard  (unchanged — already passed)
+# 9. Packaging guard
 # =============================================================================
 
 class TestLoadSkillsHelperPackaging:

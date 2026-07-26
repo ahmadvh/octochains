@@ -1,7 +1,9 @@
 import os
+from pydantic import BaseModel, Field
 from litellm import completion
-from octochains.base import Agent, Aggregator
+from octochains.base import Aggregator
 from octochains.engine import Engine 
+from octochains.agents.presets import cto_agent, cmo_agent, cpo_agent, cfo_agent
 from dotenv import load_dotenv
 import litellm
 
@@ -37,64 +39,28 @@ def call_openai(prompt: str) -> str:
     return response.choices[0].message.content
 
 # =====================================================================
-# 1. Define the Agents
+# 1. Define Strict Output Schemas (The Evidence Gates)
 # =====================================================================
 
-class TechLead(Agent):
-    def __init__(self):
-        super().__init__(
-            role="Tech Lead", 
-            goal="Assess the technical feasibility of the idea and suggest the most efficient technology stack.",
-            input_description="Micro-SaaS idea description. You MUST provide: 1. Technical feasibility score (1-10) 2. Recommended Tech Stack 3. Biggest technical hurdle.",
-            llm_callable=call_openai
-        )
+class TechEval(BaseModel):
+    feasibility_score: int = Field(ge=1, le=10, description="Technical feasibility score.")
+    recommended_stack: str = Field(description="The most efficient technology stack.")
+    biggest_hurdle: str = Field(description="The single biggest technical hurdle.")
 
-    def execute(self, problem_data: str) -> str:
-        prompt = self._build_prompt(problem_data)
-        return self.llm_callable(prompt)
+class MarketingEval(BaseModel):
+    target_audience: str = Field(description="Specific target audience persona.")
+    primary_hook: str = Field(description="The primary marketing hook.")
+    acquisition_channels: list[str] = Field(description="Top 2 cheap user acquisition channels.")
 
+class ProductEval(BaseModel):
+    why_it_will_fail: str = Field(description="Be brutal. Why will this fail?")
+    hidden_competitors: list[str] = Field(description="Direct or indirect competitors.")
+    churn_risk_factors: list[str] = Field(description="Why users will churn after week 1.")
 
-class MarketingGuru(Agent):
-    def __init__(self):
-        super().__init__(
-            role="Marketing Guru", 
-            goal="Identify the target audience, the 'hook', and user acquisition channels.",
-            input_description="Micro-SaaS idea description. You MUST provide: 1. Target Audience Persona 2. The primary marketing 'hook' 3. Top 2 cheap user acquisition channels.",
-            llm_callable=call_openai
-        )
-
-    def execute(self, problem_data: str) -> str:
-        prompt = self._build_prompt(problem_data)
-        return self.llm_callable(prompt)
-
-
-class RiskOfficer(Agent):
-    def __init__(self):
-        super().__init__(
-            role="Cynic / Risk Officer", 
-            goal="Find every reason why this idea will fail, focusing on market competition and user churn.",
-            input_description="Micro-SaaS idea description. You MUST provide: 1. Why this will fail (be brutal) 2. Hidden competitors 3. Why users will churn after week 1.",
-            llm_callable=call_ollama
-        )
-
-    def execute(self, problem_data: str) -> str:
-        prompt = self._build_prompt(problem_data)
-        return self.llm_callable(prompt)
-
-
-class PricingSpecialist(Agent):
-    def __init__(self):
-        super().__init__(
-            role="Pricing Specialist", 
-            goal="Determine the optimal monetization strategy and pricing tiers.",
-            input_description="Micro-SaaS idea description. You MUST provide: 1. Best pricing model 2. Suggested price points 3. How to justify the price to early adopters.",
-            llm_callable=call_openai
-        )
-
-    def execute(self, problem_data: str) -> str:
-        prompt = self._build_prompt(problem_data)
-        return self.llm_callable(prompt)
-
+class FinanceEval(BaseModel):
+    pricing_model: str = Field(description="The best monetization strategy.")
+    suggested_price: str = Field(description="Specific suggested price points.")
+    justification: str = Field(description="How to justify the price to early adopters.")
 
 # =====================================================================
 # 2. Define the Aggregator
@@ -104,7 +70,7 @@ class VentureCapitalist(Aggregator):
     def __init__(self):
         super().__init__(
             role="Venture Capitalist", 
-            goal="Decide if the idea is worth building based on the expert reports.",
+            goal="Decide if the idea is worth building based on the structured expert reports.",
             llm_callable=call_openai
         )
 
@@ -116,10 +82,10 @@ class VentureCapitalist(Aggregator):
 
         prompt = f"""You are a {self.role}. Your goal is to {self.goal}.
         
-        EXPERT REPORTS:
+        EXPERT REPORTS (JSON Formatted Data):
         {compiled_reports}
         
-        Based on the above reports, provide a final executive summary including:
+        Based on the structured data above, provide a final executive summary including:
         1. GO / NO-GO Decision.
         2. The strongest reason FOR building it.
         3. The strongest reason AGAINST building it.
@@ -127,7 +93,6 @@ class VentureCapitalist(Aggregator):
         """
         
         return self.llm_callable(prompt)
-
 
 # =====================================================================
 # 3. Run the Engine
@@ -139,12 +104,14 @@ if __name__ == "__main__":
     
     print(f"Evaluating Idea: '{idea_input}'\n")
 
-    # Initialize Agents
+    # Initialize Agents using Presets and Pydantic Formats
+    micro_saas_desc = "Micro-SaaS idea description."
+    
     agents = [
-        TechLead(),
-        MarketingGuru(),
-        RiskOfficer(),
-        PricingSpecialist()
+        cto_agent(llm_callable=call_openai, output_format=TechEval, input_description=micro_saas_desc),
+        cmo_agent(llm_callable=call_openai, output_format=MarketingEval, input_description=micro_saas_desc),
+        cpo_agent(llm_callable=call_openai, output_format=ProductEval, input_description=micro_saas_desc), # Still testing the local model here!
+        cfo_agent(llm_callable=call_openai, output_format=FinanceEval, input_description=micro_saas_desc)
     ]
 
     # Initialize Aggregator
@@ -155,6 +122,7 @@ if __name__ == "__main__":
     
     # Broadcast to all agents in parallel, then aggregate
     report = engine.run(problem_data=idea_input, show_log=True)
+
     
     # --- Create Results Directory ---
     output_dir = "cookbook/02-micro-saas-validator/results"

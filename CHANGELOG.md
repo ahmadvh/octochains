@@ -5,7 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-07-26
 
+### Added
+
+#### Security Threat Hunter Preset
+Added `security_threat_hunter`, a new official preset for identifying intrusion patterns and anomalous network behavior. Contributed by [@Leenaa-patil](https://github.com/Leenaa-patil) — our first community-contributed preset! 🎉
+
+#### Engine Resilience Controls
+Introduced `agent_timeout` and `max_workers` parameters on `Engine`. `agent_timeout` caps how long the parallel batch waits for straggling agents before proceeding without them — the executor now shuts down without blocking on stragglers in this case, so slow or hung agents no longer silently stall the entire workflow. `max_workers` caps concurrent agent threads, useful for respecting provider rate limits when running larger agent councils.
+
+#### Completeness Gate for High-Stakes Workflows
+Added `require_all_agents` to `Engine`. When enabled, any single agent failure halts the workflow *before* the aggregator is ever invoked, raising `IncompleteAgentBatchError` rather than silently synthesizing a verdict from partial data. This is aimed at audit-critical pipelines — e.g. a due-diligence council where a missing compliance check shouldn't be quietly absorbed into a "looks fine" consensus. Defaults to `False`, preserving the existing partial-synthesis behavior.
+
+#### Refined Exception Taxonomy
+Introduced `NoValidReportsError` (raised when every parallel agent fails) and `IncompleteAgentBatchError` (raised when `require_all_agents=True` and some, but not all, agents fail — includes `.failed_roles` and `.succeeded_roles` for precise programmatic handling).
+
+#### Pydantic Schema Enforcement (`output_format`)
+`SkilledAgent` and all official presets now natively accept a Pydantic `BaseModel` via the `output_format` argument. When provided, the framework automatically injects the strict JSON schema requirements into the LLM prompt, enforcing structured, machine-readable output without requiring custom subclassing.
+
+#### Dynamic Preset Overrides
+Users can now override the default `input_description` parameter across all preset factory functions on the fly, allowing for highly specific context instructions without altering the underlying agent configuration.
+
+### Changed
+
+#### Stricter Agent Role Validation
+`Engine` now validates that all agent roles are unique at construction time, raising `ValueError` immediately. Previously, duplicate roles would silently overwrite each other's reports mid-aggregation with no indication anything was lost.
+
+#### Deterministic Audit Trails
+`Report.traces` now preserves the exact order agents were passed into `Engine`, rather than the order their LLM calls happened to complete in. Audit trails are now reproducible run-to-run regardless of network timing.
+
+#### ⚠️ BREAKING: `AggregatorError` Scope Narrowed
+`AggregatorError` is now raised only when the aggregator itself fails during synthesis. The "all agents failed" case — previously also using `AggregatorError` — now raises the more specific `NoValidReportsError`. Code catching `AggregatorError` to handle both cases should be updated to catch `NoValidReportsError` separately. Consistent with our pre-1.0 policy of allowing minor breaking changes where they meaningfully improve error precision.
+
+### Fixed
+
+#### `agent_timeout` Silently Ignored Its Own Deadline
+The initial implementation correctly labeled timed-out agents in the audit trace, but `ThreadPoolExecutor`'s context-manager exit blocked on ALL submitted work regardless of the configured timeout — meaning `Engine.run()` could still hang for the full duration of the slowest agent even after logically deciding to move on without it. The executor is now managed explicitly with a non-blocking shutdown path specifically for the timeout case, so `run()` reliably returns control at the configured deadline.
+
+#### Total Failure Misreported Under `require_all_agents`
+Fixed an ordering bug where, with `require_all_agents=True`, a total agent failure (zero successes across the board) was incorrectly surfaced as `IncompleteAgentBatchError` instead of the more accurate `NoValidReportsError`. Total-failure detection is now checked unconditionally, ahead of the completeness gate.
+
+---
 
 ## [0.5.0] - 2026-07-14
 

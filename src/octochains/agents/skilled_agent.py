@@ -9,6 +9,7 @@
 
 from typing import Any
 from octochains.base import Agent
+from octochains.utils import parse_and_validate_json
 
 class SkilledAgent(Agent):
     """
@@ -27,7 +28,7 @@ class SkilledAgent(Agent):
         The standard execution flow for a purely reasoning-based expert agent.
         
         It retrieves the isolated identity prompt, appends all relevant procedural 
-        skill constraints, executes the user's provided LLM, and formats the output.
+        skill constraints, executes the user's provided LLM, and parses/formats the output.
         """
         # 1. Retrieve the strict, isolated identity and task prompt
         prompt = self._build_prompt(problem_data)
@@ -42,5 +43,10 @@ class SkilledAgent(Agent):
         # We know this exists because base.py enforces the fail-fast check on init
         raw_result = self.llm_callable(prompt)
 
-        # 4. Strip <think> tags and normalize JSON/Pydantic outputs for the Aggregator
+        # 4. If an output_format schema is required, extract and validate the JSON.
+        if self.output_format:
+            validated_object = parse_and_validate_json(raw_result, self.output_format)
+            return self.format_output(validated_object)
+
+        # 5. Otherwise, strip <think> tags and normalize basic string outputs
         return self.format_output(raw_result)

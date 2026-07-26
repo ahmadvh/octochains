@@ -7,7 +7,7 @@
 # ==============================================================================
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Callable, Any, Optional
+from typing import Dict, List, Callable, Any, Optional,Type
 import json
 import re
 from dataclasses import is_dataclass, asdict
@@ -30,7 +30,8 @@ class Agent(ABC):
                  goal: str, 
                  input_description: Optional[str] = None,
                  llm_callable: Optional[LLMCallable] = None,
-                 skills: Optional[List['Skill']] = None):
+                 skills: Optional[List['Skill']] = None,
+                 output_format: Optional[Type[BaseModel]] = None):
         """
         Initializes the Agent.
         
@@ -40,6 +41,7 @@ class Agent(ABC):
             input_description: A short description of the input data. 
             llm_callable: A model-agnostic execution function. 
             skills: A list of granular procedural markdown skills.
+            output_format: A Pydantic BaseModel to enforce structured JSON output.
         """
         # Fail-fast check to prevent silent thread crashes and enforce BYO-LLM
         if skills and llm_callable is None:
@@ -54,6 +56,7 @@ class Agent(ABC):
         self.input_description = input_description
         self.llm_callable = llm_callable
         self.skills = skills or []
+        self.output_format = output_format
 
     def _skill_index(self) -> str:
         """Returns a progressive-disclosure summary of available skills."""
@@ -93,7 +96,7 @@ class Agent(ABC):
         """
         The "Sensible Default" prompt builder.
         Automatically constructs a highly structured, strict identity prompt.
-        Users can utilize this in their custom execute() methods to establish the persona.
+        If output_format is set, injects the strict JSON schema requirements.
         """
         prompt = f"""
             You are operating in a highly restricted, isolated environment.
@@ -112,9 +115,20 @@ class Agent(ABC):
             CRITICAL INSTRUCTIONS:
             Answer strictly from the perspective of your Role. 
             Do not provide a generic summary. Provide actionable, specialized insights based on the data above.
-
-            YOUR SPECIALIZED REPORT:
             """
+            
+        if self.output_format:
+            schema_str = json.dumps(self.output_format.model_json_schema(), indent=2)
+            prompt += f"""
+            === OUTPUT FORMAT REQUIREMENT ===
+            You MUST return ONLY a valid JSON object matching the schema below. 
+            Do not include conversational filler, markdown formatting blocks (like ```json), or any text outside the JSON block.
+            
+            SCHEMA:
+            {schema_str}
+            """
+
+        prompt += "\n            YOUR SPECIALIZED REPORT:\n            "
         return prompt
 
     def format_output(self, raw_result: Any) -> str:

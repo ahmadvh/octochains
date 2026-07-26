@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "octochains"
-version = "0.5.0"
+version = "0.6.0"
 description = "An orchestration framework for reliable multi-agent decision-making, parallel isolated reasoning, and consensus aggregation."
 readme = "README.md"
 license = { text = "BSL-1.1" }

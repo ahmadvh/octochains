@@ -1,12 +1,11 @@
 import os
 from dotenv import load_dotenv
 
-from pydantic import BaseModel,  field_validator, ConfigDict
+from pydantic import BaseModel, field_validator, ConfigDict
 
-from octochains.base import Agent
 from octochains.engine import Engine
 from octochains.aggregators import ConflictChecker
-from octochains.utils import parse_and_validate_json
+from octochains.agents.presets import cfo_agent, cto_agent, cro_agent
 from openai import OpenAI
 
 # 1. Load API Key
@@ -62,46 +61,7 @@ class RevenueProjection(BaseModel):
 
 
 # ==============================================================================
-# 3. Define the Specialized Agents 
-# ==============================================================================
-
-class CFOAgent(Agent):
-    def __init__(self):
-        super().__init__(
-            role="Chief Financial Officer",
-           goal="Evaluate financial viability. You MUST extract the exact runway timeline (e.g., months left) and specific cash burn numbers into your primary concern."
-        )
-    def execute(self, data: str) -> FinancialAssessment:
-        prompt = f"{self.goal}\n\nDOSSIER:\n{data}\n\nReturn ONLY raw JSON with keys: valuation_verdict, risk_level, primary_concern."
-        raw_json = call_openai(prompt)
-        # parse_and_validate_json automatically utilizes FinancialAssessment.model_validate()
-        return parse_and_validate_json(raw_json, FinancialAssessment)
-
-class CTOAgent(Agent):
-    def __init__(self):
-        super().__init__(
-            role="Chief Technology Officer",
-            goal="Evaluate technical architecture. Focus on infrastructure costs, tech debt, and key personnel risks."
-        )
-    def execute(self, data: str) -> TechDueDiligence:
-        prompt = f"{self.goal}\n\nDOSSIER:\n{data}\n\nReturn ONLY raw JSON with keys: architecture_viability, estimated_refactor_timeline, blockers."
-        raw_json = call_openai(prompt)
-        return parse_and_validate_json(raw_json, TechDueDiligence)
-
-class CROAgent(Agent):
-    def __init__(self):
-        super().__init__(
-            role="Chief Revenue Officer",
-            goal="Evaluate the market synergy. You MUST extract the exact target metrics, client volume, and explicit timelines (e.g., Q3) for the cross-selling strategy and include them in your scaling rationale."
-        )
-    def execute(self, data: str) -> RevenueProjection:
-        prompt = f"{self.goal}\n\nDOSSIER:\n{data}\n\nReturn ONLY raw JSON with keys: q3_upsell_confidence, expected_integration_speed, scaling_rationale."
-        raw_json = call_openai(prompt)
-        return parse_and_validate_json(raw_json, RevenueProjection)
-
-
-# ==============================================================================
-# 4. Orchestration & Execution
+# 3. Orchestration & Execution
 # ==============================================================================
 
 def main():
@@ -116,8 +76,25 @@ def main():
         print(f"Error: {input_path} not found.")
         return
 
-    # Initialize the parallel workers
-    agents = [CFOAgent(), CTOAgent(), CROAgent()]
+    # Initialize the parallel workers using OFFICIAL PRESETS
+    # We override input_description to inject the precise instruction rules from the original code
+    agents = [
+        cfo_agent(
+            llm_callable=call_openai, 
+            output_format=FinancialAssessment,
+            input_description="Target Dossier. You MUST extract the exact runway timeline (e.g., months left) and specific cash burn numbers into your primary concern."
+        ),
+        cto_agent(
+            llm_callable=call_openai, 
+            output_format=TechDueDiligence,
+            input_description="Target Dossier. Focus on infrastructure costs, tech debt, and key personnel risks."
+        ),
+        cro_agent(
+            llm_callable=call_openai, 
+            output_format=RevenueProjection,
+            input_description="Target Dossier. You MUST extract the exact target metrics, client volume, and explicit timelines (e.g., Q3) for the cross-selling strategy and include them in your scaling rationale."
+        )
+    ]
     
     # define custom goal 
     ma_due_diligence_goal = (
@@ -148,7 +125,7 @@ def main():
     report = engine.run(problem_data=dossier_data, show_log=True)
 
     # ==============================================================================
-    # 5. Format and Save the Output
+    # 4. Format and Save the Output
     # ==============================================================================
     
     print("\n[Engine] Formatting results for output.txt...")
@@ -163,8 +140,8 @@ def main():
     for trace in report.traces:
         output_lines.append(f"\n[{trace.agent_role}]")
         if trace.status == "success":
-            # UPDATED: Use Pydantic's native JSON serialization instead of __dict__
-            output_lines.append(trace.output.model_dump_json(indent=2))
+            # The output is now a parsed Pydantic object, so we dump it to JSON for saving
+            output_lines.append(trace.output)
         else:
             output_lines.append(f"Error: {trace.error_message}")
 
