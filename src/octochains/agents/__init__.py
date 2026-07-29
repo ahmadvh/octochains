@@ -10,7 +10,9 @@ from .presets import (
     cto_agent,
     cro_agent,
     cpo_agent,
-    cmo_agent
+    cmo_agent,
+    # Securtiy
+    insider_threat_analyst,
 )
 
 __all__ = [
@@ -25,5 +27,7 @@ __all__ = [
     "cto_agent",
     "cro_agent",
     "cpo_agent",
-    "cmo_agent"
+    "cmo_agent",
+    # Securtiy
+    "insider_threat_analyst"
 ]
