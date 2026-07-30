@@ -102,8 +102,22 @@ def security_threat_hunter(llm_callable: LLMCallable,
         skills=base_skills + (extra_skills or []),
         output_format=output_format
     )
-    
-def cfo_agent(llm_callable: LLMCallable, 
+
+def insider_threat_analyst(llm_callable: LLMCallable,
+                           extra_skills: Optional[List[Skill]] = None,
+                           output_format: Optional[Type[BaseModel]] = None,
+                           input_description: Optional[str] = None) -> SkilledAgent:
+    base_skills = _load_skills("octochains.agents.skills.security", "insider-threat-behavioral-analysis")
+    return SkilledAgent(
+        role="Insider Threat Analyst",
+        goal="Detect anomalous behavior from authenticated users — unusual data exports, off-hours access, and unauthorized exfiltration — and distinguish negligence from malicious intent.",
+        input_description=input_description or "Access logs, export/download records, and privileged account activity.",
+        llm_callable=llm_callable,
+        skills=base_skills + (extra_skills or []),
+        output_format=output_format
+    )
+
+def cfo_agent(llm_callable: LLMCallable,
               extra_skills: Optional[List[Skill]] = None,
               output_format: Optional[Type[BaseModel]] = None,
               input_description: Optional[str] = None) -> SkilledAgent:

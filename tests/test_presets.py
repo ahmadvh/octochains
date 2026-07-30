@@ -10,6 +10,7 @@ from octochains.agents import presets
 from octochains.agents.presets import (
     cfo_agent, cto_agent, cro_agent, cpo_agent, cmo_agent,
     data_sovereignty_auditor, ai_risk_assessor, phi_sanitizer, licensing_reviewer, security_threat_hunter,
+    insider_threat_analyst,
 )
 
 # =============================================================================
@@ -33,6 +34,7 @@ ALL_PRESET_FACTORIES = [
     phi_sanitizer,
     licensing_reviewer,
     security_threat_hunter,
+    insider_threat_analyst,
 ]
 
 EXPECTED_ROLES = {
@@ -46,6 +48,13 @@ EXPECTED_ROLES = {
     phi_sanitizer: "Health Data Compliance Officer",
     licensing_reviewer: "Open-Source Compliance Engineer",
     security_threat_hunter: "Security Threat Hunter",
+    insider_threat_analyst: "Insider Threat Analyst",
+}
+
+# Presets whose bundled skill name must match exactly (guards packaging/wiring).
+EXPECTED_SKILL_NAMES = {
+    insider_threat_analyst: "insider-threat-behavioral-analysis",
+    security_threat_hunter: "threat-intel-triage",
 }
 
 
@@ -303,6 +312,31 @@ class TestAllPresetsUniformly:
         custom_desc = "CUSTOM INPUT OVERRIDE"
         agent = factory(llm_callable=simple_llm, input_description=custom_desc)
         assert agent.input_description == custom_desc
+
+
+# =============================================================================
+# 7b. Security presets — correct skill wiring
+# =============================================================================
+
+@pytest.mark.parametrize(
+    "factory,skill_name",
+    list(EXPECTED_SKILL_NAMES.items()),
+    ids=lambda v: v.__name__ if callable(v) else v,
+)
+class TestSecurityPresetsAttachCorrectSkill:
+
+    def test_attaches_the_expected_named_skill(self, factory, skill_name):
+        agent = factory(llm_callable=simple_llm)
+        names = [s.name for s in agent.skills]
+        assert skill_name in names, (
+            f"{factory.__name__} should bundle skill '{skill_name}', got {names}"
+        )
+
+    def test_bundled_skill_has_non_empty_content(self, factory, skill_name):
+        agent = factory(llm_callable=simple_llm)
+        skill = agent.get_skill(skill_name)
+        assert skill is not None
+        assert skill.content and skill.content.strip()
 
 
 # =============================================================================
