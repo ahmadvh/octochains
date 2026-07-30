@@ -304,6 +304,26 @@ writer = Synthesizer(
     show_log=True
 )
 ```
+### 3. WeightedSynthesizer
+A `Synthesizer` variant for **proportional emphasis**. When some perspectives should shape the final narrative more than others as a baseline — not just when they conflict — you assign weights per agent role, and the higher-weighted perspectives drive the framing and conclusions while lower-weighted ones are folded in as supporting context. This is distinct from `ConflictChecker`: it is about prominence in the blend, applied even when all experts fully agree.
+
+* **Missing weights:** any responding role absent from `weights` falls back to equal footing (`default_weight=1.0`) — unweighted agents are never silently dropped.
+* **Normalization:** weights are normalized to sum to 1.0; `weights_applied` and `dominant_perspective` are recorded on the result as a deterministic audit trail of how the blend was shaped.
+* **Degenerate case:** equal weights produce output equivalent to the plain `Synthesizer`.
+
+```python
+from octochains.aggregators import WeightedSynthesizer
+
+boss = WeightedSynthesizer(
+    llm_callable=my_llm,
+    weights={
+        "CTO": 0.7,
+        "CRO": 0.2,
+        "GDPR Auditor": 0.1,
+    },
+    show_log=True
+)
+```
 Check out the `/cookbook/` directory for full examples of these aggregators in action.
 
 ## Repository Structure
