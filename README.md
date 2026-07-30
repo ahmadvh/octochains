@@ -99,7 +99,7 @@ report = engine.run(
 print(report.consensus.narrative)
 ```
 
-That's a full parallel-isolated reasoning pipeline — no custom classes, no prompt engineering. See the [Official Preset Agents](#official-preset-agents) catalog for all 9 available specialists. Everything below shows how to build your own agents, aggregators, and Skills from scratch.
+That's a full parallel-isolated reasoning pipeline — no custom classes, no prompt engineering. See the [Official Preset Agents](#official-preset-agents) catalog for all 12 available specialists. Everything below shows how to build your own agents, aggregators, and Skills from scratch.
 
 ### 4. Define Specialist Agents from Scratch
 Agents inherit from `Agent` and implement an `execute()` method. The framework builds the strict "Forced Perspective" identity prompt for you, while you retain full control over the execution loop.
@@ -221,6 +221,15 @@ For flagging legal and regulatory exposure before it reaches a human reviewer.
 | `ai_risk_assessor` | AI Risk Assessor | EU AI Act regulatory tiering |
 | `phi_sanitizer` | Health Data Compliance Officer | Special Category Data (PHI) handling & anonymization |
 | `licensing_reviewer` | Open-Source Compliance Engineer | Copyleft (GPL/AGPL) contamination risk |
+
+### Security Operations Analysts
+For dissecting the same log and incident evidence from non-overlapping security angles in parallel.
+
+| Preset | Role | Focus |
+| :--- | :--- | :--- |
+| `security_threat_hunter` | Security Threat Hunter | External intrusions — IoCs, anomalous endpoint/network behavior, MITRE ATT&CK tactics |
+| `identity_access_auditor` | Identity & Access Auditor | Authentication layer — failed-login clustering, privilege-escalation chains, MFA-bypass |
+| `breach_notification_analyst` | Breach Notification Analyst | Regulatory triage — personal-data exposure and GDPR Art. 33/34 notification obligations |
 
 ```python
 from octochains.agents.presets import cfo_agent, cto_agent, licensing_reviewer
