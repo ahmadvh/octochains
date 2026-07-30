@@ -1,7 +1,8 @@
 ---
-Name: insider-threat-behavioral-analysis
-Description: Detects anomalous behavior by authenticated users that may indicate insider threats through behavioral analysis of access patterns, privileged actions, and data movement.
-Version: 1.0.0
+| Name | insider-threat-behavioral-analysis  |
+|------|----------------------|
+| Description | Detects anomalous behavior by authenticated users that may indicate insider threats through behavioral analysis of access patterns, privileged actions, and data movement. |
+| Version | 1.0.0 |
 ---
 
 ## Objective
@@ -39,22 +40,22 @@ Analyze authenticated user activity to identify behavioral deviations that may i
 
 **Priority Findings:**
 
--[Finding 1]
--[Finding 2]
+- [Finding 1]
+- [Finding 2]
 
 **Behavioral Deviations:**
 
--[Unusual timing, access volume, resource access, or data movement]
+- [Unusual timing, access volume, resource access, or data movement]
 
 **Intent Assessment:**
 
--[NEGLIGENCE | POTENTIAL MALICIOUS INTENT | AMBIGUOUS]
+- [NEGLIGENCE | POTENTIAL MALICIOUS INTENT | AMBIGUOUS]
 
 **Evidence:**
 
--[relevant activity, access, privilege, export, or transfer evidence]
+- [relevant activity, access, privilege, export, or transfer evidence]
 
 **Recommended Next Steps:**
 
--[Investigation, validation, monitoring, or containment actions]
+- [Investigation, validation, monitoring, or containment actions]
 
