@@ -1,0 +1,27 @@
+FEATURE LAUNCH DOSSIER — "CarePredict AI Triage Assistant"
+
+Overview:
+A new AI-powered symptom-triage assistant for a European telehealth platform.
+Patients describe symptoms in free text; the model suggests a likely urgency
+level (self-care / GP visit / urgent care) and recommends next steps.
+
+Data & Storage:
+- Collects free-text symptom descriptions, age, sex, and prior-condition flags.
+- Stores full conversation transcripts and structured health flags in a managed
+  Postgres instance hosted in us-east-1 (AWS).
+- Analytics events (including symptom keywords) are streamed to a third-party
+  product-analytics vendor based in the United States.
+- Transcripts are retained indefinitely for "model improvement".
+
+Model & Automation:
+- The triage suggestion is shown directly to the patient with no clinician in
+  the loop before display.
+- A confidence score gates whether the "urgent care" banner is shown.
+
+Tech Stack:
+- Inference served via an open-source model fine-tuned in-house.
+- The fine-tuning pipeline links against an AGPL-3.0 licensed data-processing
+  library, and the whole service is distributed as a SaaS product.
+
+Timeline:
+- Targeting EU (Germany, France) launch in 6 weeks.
