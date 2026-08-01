@@ -11,7 +11,8 @@ from .presets import (
     cro_agent,
     cpo_agent,
     cmo_agent,
-    # Securtiy
+    # Security
+    security_threat_hunter,
     insider_threat_analyst,
 )
 
@@ -28,6 +29,7 @@ __all__ = [
     "cro_agent",
     "cpo_agent",
     "cmo_agent",
-    # Securtiy
-    "insider_threat_analyst"
+    # Security
+    "security_threat_hunter",
+    "insider_threat_analyst",
 ]

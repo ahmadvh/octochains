@@ -159,7 +159,7 @@ def cmo_agent(llm_callable: LLMCallable,
         output_format=output_format
     )
                   
- def security_threat_hunter(llm_callable: LLMCallable, 
+def security_threat_hunter(llm_callable: LLMCallable, 
                            extra_skills: Optional[List[Skill]] = None,
                            output_format: Optional[Type[BaseModel]] = None,
                            input_description: Optional[str] = None) -> SkilledAgent:
