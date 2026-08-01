@@ -89,20 +89,6 @@ def licensing_reviewer(llm_callable: LLMCallable,
         output_format=output_format
     )
     
-def security_threat_hunter(llm_callable: LLMCallable, 
-                           extra_skills: Optional[List[Skill]] = None,
-                           output_format: Optional[Type[BaseModel]] = None,
-                           input_description: Optional[str] = None) -> SkilledAgent:
-    base_skills = _load_skills("octochains.agents.skills.security", "threat-intel-triage")
-    return SkilledAgent(
-        role="Security Threat Hunter",
-        goal="Identify indicators of compromise, anomalous network and endpoint behavior, and active intrusion patterns from the provided data.",
-        input_description=input_description or "Network logs, endpoint activity reports, or firewall/IDS configuration data.",
-        llm_callable=llm_callable,
-        skills=base_skills + (extra_skills or []),
-        output_format=output_format
-    )
-    
 def cfo_agent(llm_callable: LLMCallable, 
               extra_skills: Optional[List[Skill]] = None,
               output_format: Optional[Type[BaseModel]] = None,
@@ -168,6 +154,34 @@ def cmo_agent(llm_callable: LLMCallable,
         role="Chief Marketing Officer (CMO)",
         goal="Audit unit economics, CAC to LTV ratios, and the sustainability of user acquisition channels.",
         input_description=input_description or "Growth metrics, marketing channels, and customer acquisition costs.",
+        llm_callable=llm_callable,
+        skills=base_skills + (extra_skills or []),
+        output_format=output_format
+    )
+                  
+ def security_threat_hunter(llm_callable: LLMCallable, 
+                           extra_skills: Optional[List[Skill]] = None,
+                           output_format: Optional[Type[BaseModel]] = None,
+                           input_description: Optional[str] = None) -> SkilledAgent:
+    base_skills = _load_skills("octochains.agents.skills.security", "threat-intel-triage")
+    return SkilledAgent(
+        role="Security Threat Hunter",
+        goal="Identify indicators of compromise, anomalous network and endpoint behavior, and active intrusion patterns from the provided data.",
+        input_description=input_description or "Network logs, endpoint activity reports, or firewall/IDS configuration data.",
+        llm_callable=llm_callable,
+        skills=base_skills + (extra_skills or []),
+        output_format=output_format
+    )
+                     
+def insider_threat_analyst(llm_callable: LLMCallable, 
+              extra_skills: Optional[List[Skill]] = None,
+              output_format: Optional[Type[BaseModel]] = None,
+              input_description: Optional[str] = None) -> SkilledAgent:
+    base_skills = _load_skills("octochains.agents.skills.security", "insider-threat-behavioral-analysis")
+    return SkilledAgent(
+        role="Insider Threat Analyst",
+        goal="Detect anomalous behavior from authenticated users, such as unusual data exports, off-hours access, unauthorized exfiltration",
+        input_description= input_description or "Access logs, export/download records, privileged account activity, and related HR or security alerts.",
         llm_callable=llm_callable,
         skills=base_skills + (extra_skills or []),
         output_format=output_format
