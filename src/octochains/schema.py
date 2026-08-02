@@ -45,6 +45,32 @@ class SynthesisResult(BaseModel):
     def to_json(self) -> str:
         return self.model_dump_json()
 
+class WeightedSynthesisResult(BaseModel):
+    """
+    Structured output for the WeightedSynthesizer.
+
+    Extends the Synthesizer contract with two audit fields that record how the
+    configured weighting actually shaped the blend. `weights_applied` and
+    `dominant_perspective` are computed deterministically by the aggregator
+    (not returned by the LLM), so they always reflect the real configuration.
+    """
+    narrative: str
+    key_takeaways: List[str]
+    confidence: float  # [0.0 - 1.0] Subjective confidence score self-assessed by the LLM.
+    citations: Dict[str, str] = Field(default_factory=dict)  # Key: Expert Role, Value: Snippet
+    weights_applied: Dict[str, float] = Field(default_factory=dict)  # Normalized weight per role
+    dominant_perspective: str = ""  # Highest-weighted role that most shaped the narrative
+
+    # Silently ignore any extra keys hallucinated by the LLM
+    model_config = ConfigDict(extra='ignore')
+
+    def to_dict(self) -> dict:
+        """Standardized helper for JSON serialization."""
+        return self.model_dump()
+
+    def to_json(self) -> str:
+        return self.model_dump_json()
+
 class Conflict(BaseModel):
     """Details on a specific logical inconsistency."""
     description: str
