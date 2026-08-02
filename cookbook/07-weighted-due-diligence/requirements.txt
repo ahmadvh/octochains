@@ -1,0 +1,3 @@
+octochains
+openai
+python-dotenv

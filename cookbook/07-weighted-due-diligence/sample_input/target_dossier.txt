@@ -1,0 +1,58 @@
+CONFIDENTIAL — TARGET DOSSIER
+Company: Solenne AI
+Stage: Series A
+Sector: LLM Infrastructure — Agent Memory & Retrieval
+
+=== COMPANY OVERVIEW ===
+Solenne AI builds a low-latency vector search and reasoning-cache layer purpose-built
+for LLM agent memory. The core product is a proprietary distributed indexing engine
+that lets multi-agent systems recall relevant context in under 40ms at scale, without
+the retrieval-latency penalties of standard vector DB wrappers.
+
+=== ENGINEERING & PRODUCT ===
+- 14-person engineering team, several ex-Google Research and DeepMind alumni.
+- Proprietary distributed indexing algorithm; provisional patent filed (not yet granted).
+- Sub-40ms p99 retrieval latency at 10M+ vector scale, independently benchmarked by
+  two of the six pilot customers.
+- 11,400 GitHub stars on the open-source client SDK; strong inbound developer interest.
+- Currently 6 paying enterprise pilots; GA release is not yet public.
+- Two pilots have technically integrated the full stack into production agent workflows;
+  the remaining four are still in evaluation/sandbox mode.
+- Engineering NPS among hands-on developer users is very high (unprompted praise for
+  API ergonomics and latency in support channels).
+- No dedicated DevRel or enterprise sales engineering function yet — technical
+  onboarding for new pilots is handled directly by founding engineers.
+
+=== FINANCIALS ===
+- Raised $6.2M in Series A (18 months ago).
+- Current MRR: $180,000.
+- Monthly burn: $340,000.
+- Cash on hand implies approximately 9 months of runway at current burn, before
+  accounting for any new revenue growth.
+- No committed bridge or follow-on round currently in place.
+
+=== SALES & REVENUE ===
+- Average enterprise sales cycle: approximately 6 months from first contact to signed
+  annual contract.
+- Of the 6 active pilots: 2 have converted to signed annual contracts (combined
+  ~$95K ARR), 4 remain in evaluation with no signed commercial terms yet.
+- Pipeline beyond the current 6 pilots is thin — approximately 3 additional prospects
+  in early-stage conversations, none with a committed evaluation timeline.
+- No dedicated enterprise account executive; sales conversations are run by the
+  co-founder/CEO directly.
+
+=== MARKETING & GROWTH ===
+- Primary acquisition channel is inbound, driven by open-source developer content
+  and conference talks — low direct CAC but not yet a repeatable, scalable channel.
+- A paid LinkedIn ABM campaign targeting VP-Eng personas ran for 3 months; cost per
+  qualified lead was roughly 4x the team's internal target, and was paused pending
+  a channel rethink.
+- No in-house content or growth marketing hire; the open-source developer content
+  has been produced ad hoc by the engineering team.
+
+=== ORGANIZATIONAL NOTES ===
+- Two of the three co-founders are technical (CTO, Chief Architect); the third
+  handles go-to-market and operations.
+- The company has had informal acquisition interest from two larger infrastructure
+  players, both of whom cited the indexing algorithm and engineering team as the
+  primary point of interest in early conversations.

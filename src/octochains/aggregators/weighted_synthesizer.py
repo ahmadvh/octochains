@@ -175,14 +175,31 @@ class WeightedSynthesizer(Aggregator):
         Goal: {self.goal}
 
         INSTRUCTIONS:
+        INSTRUCTIONS:
         1. Synthesize the expert reports below into a single, comprehensive response.
-        2. WEIGHTED EMPHASIS: Each report is annotated with an emphasis weight. Structure the
-           narrative so that higher-weighted perspectives drive the framing, conclusions, and
-           emphasis. The dominant perspective is "{dominant}" — build the throughline around it.
-           Lower-weighted perspectives MUST still be represented, but as proportionally less
-           prominent supporting context. Do NOT drop any perspective entirely.
-        3. This is emphasis, not conflict resolution: apply the weighting even if all experts agree.
-        4. ANTI-HALLUCINATION GUARDRAIL: Synthesize strictly and ONLY from the reports provided.
+        2. WEIGHTED EMPHASIS BANDS: Each report is annotated with an emphasis weight (%).
+           Apply these bands literally — treat them as hard requirements, not stylistic
+           suggestions:
+             - ANCHOR (weight >= 40%): This is the dominant perspective, "{dominant}".
+               It MUST open the narrative and drive the framing and conclusions. Give it
+               3+ dedicated narrative sentences and 2-3 dedicated key_takeaways.
+             - MAJOR (weight 20-39%): Give it at least 2 dedicated narrative sentences and
+               exactly 1-2 dedicated key_takeaways. It must read as a distinct, substantive
+               perspective — not a footnote to the anchor.
+             - SUPPORTING (weight 8-19%): Give it at least 1 dedicated narrative sentence
+               and exactly 1 dedicated key_takeaway.
+             - MINOR (weight < 8%): May share a single narrative sentence with another
+               minor perspective. A dedicated key_takeaway is optional, but the perspective
+               MUST still be named at least once in the narrative — never omitted entirely.
+           Every responding agent falls into exactly one band based on its annotated weight.
+           Do not collapse MAJOR or SUPPORTING perspectives down to MINOR treatment just
+           because they are not the anchor.
+        3. STRICT ORDERING: The key_takeaways list MUST be sorted by descending emphasis
+           weight of its source perspective — highest-weighted perspective's takeaway(s)
+           first, lowest-weighted last. Before finalizing your answer, verify this ordering
+           holds for every consecutive pair in the list.
+        4. This is emphasis, not conflict resolution: apply the weighting even if all experts agree.
+        5. ANTI-HALLUCINATION GUARDRAIL: Synthesize strictly and ONLY from the reports provided.
            Do NOT invent perspectives for missing specialists.
 
         REPORTS:
