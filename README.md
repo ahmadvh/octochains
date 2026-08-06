@@ -46,6 +46,8 @@ Octochains is built on the architectural principles validated in the study **["T
 
 https://github.com/user-attachments/assets/ede601fd-0a08-451f-b783-67d854767bb8
 
+For the full technical breakdown, engine internals, aggregator implementations, and the research this design is grounded in, see the [Technical White Paper](docs/white-paper.md).
+
 ---
 
 ## Quickstart
