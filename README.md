@@ -1,7 +1,7 @@
 # Octochains
 
 [![GOSIM Spotlight 2026](https://img.shields.io/badge/GOSIM_2026-Top_10_Featured_Project-blueviolet)](https://paris2026.gosim.org/) 
-[![License: BUSL 1.1](https://img.shields.io/badge/License-BSL_1.1-orange.svg)](LICENSE)
+[![License: BUSL 1.1](https://img.shields.io/badge/License-BUSL_1.1-orange.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.7.0-purple)](https://pypi.org/project/octochains/)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/octochains?period=total&units=INTERNATIONAL_SYSTEM&left_color=gray&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/octochains)
 
