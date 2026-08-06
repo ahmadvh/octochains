@@ -6,16 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.7.0] - 2026-08-07
-
+ 
 ### Added
-
+ 
+#### Insider Threat Analyst Preset
+Added `insider_threat_analyst`, a new official Security preset detecting anomalous behavior from already-authenticated users: unusual access timing, abnormal data exports, and privileged-action deviations. Explicitly scoped to post-login behavior only; external intrusion and IoC analysis stay with `security_threat_hunter`. Contributed by [@Leenaa-patil](https://github.com/Leenaa-patil).
+ 
+#### Breach Notification Analyst Preset
+Added `breach_notification_analyst`, the regulatory-risk lens in the Security preset series. Takes the same incident/log evidence as the other security presets and determines whether an incident involves personal data and triggers legal breach-notification obligations, evaluating GDPR Art. 33 (72-hour supervisory-authority notification) and Art. 34 (high-risk individual notification) duties and timelines. Scoped to notification obligations only; technical severity assessment stays with `security_threat_hunter`. Contributed by [@shariqueahmad108-ship-it](https://github.com/shariqueahmad108-ship-it).
+ 
 #### Identity & Access Auditor Preset
-Added `identity_access_auditor`, a new official Security preset analyzing authentication and authorization events, failed-login clustering, privilege-escalation chains, credential-stuffing patterns, and MFA-bypass indicators, to determine how access was obtained. Scoped strictly to the access-grant and authentication layer; complements `security_threat_hunter` (external intrusion) and `insider_threat_analyst` (post-login behavior) without overlapping either.
-
+Added `identity_access_auditor`, a new official Security preset analyzing authentication and authorization events: failed-login clustering (brute-force vs. credential stuffing vs. user error), privilege-escalation chains, and MFA-bypass indicators, to determine how access was obtained. Scoped strictly to the access-grant and authentication layer; complements `security_threat_hunter` (external intrusion) and `insider_threat_analyst` (post-login behavior) without overlapping either.
+ 
+#### WeightedSynthesizer Aggregator
+Added `WeightedSynthesizer`, a `Synthesizer` variant for proportional emphasis: perspectives are weighted by agent role so higher-weighted reports drive the final narrative's framing and conclusions, while lower-weighted ones are folded in as supporting context. This is emphasis in the blend, not conflict resolution (that stays with `ConflictChecker`), the weighting is applied even when all experts agree. Roles missing from the configured weights fall back to `default_weight` (1.0) rather than being silently dropped, weights are normalized to sum to 1.0, and `weights_applied`/`dominant_perspective` are computed deterministically by the aggregator itself (not returned by the LLM) and recorded on the result as an audit trail of how the blend was shaped. Contributed by [@OrienSpec](https://github.com/OrienSpec).
+ 
+#### New Cookbook Recipe: Weighted Due-Diligence
+Added `cookbook/07-weighted-due-diligence/`, demonstrating `WeightedSynthesizer` in a due-diligence council where one perspective (e.g. the CTO's technical risk assessment) is deliberately weighted to dominate the final narrative while other experts are still represented.
+ 
+#### New Cookbook Recipe: AI Feature Compliance Gate
+Added `cookbook/06-ai-feature-compliance-gate-anthropic/`, wired to the Anthropic Claude API via the official `anthropic` SDK. The four official compliance presets (`data_sovereignty_auditor`, `ai_risk_assessor`, `phi_sanitizer`, `licensing_reviewer`) review the same feature dossier in parallel isolation, with a `Synthesizer` merging them into a go/no-go memo. Self-contained with its own `requirements.txt`; no change to core `pyproject.toml`. Contributed by [@OrienSpec](https://github.com/OrienSpec).
+ 
+#### Technical White Paper
+Added `docs/white-paper.md`, a full engineering deep-dive covering the `Engine` orchestration model (thread isolation, fault handling, timeout semantics), the `Agent`/`Aggregator` base contracts, the Skills frontmatter parser, and the `ConflictChecker`/`WeightedSynthesizer` implementations, grounded in the architecture validated by "Towards a Science of Scaling Agent Systems" (arXiv:2512.08296).
+ 
 ### Fixed
-
+ 
+#### `security_threat_hunter` Missing From Package Exports
+`security_threat_hunter` was merged and fully functional in `presets.py` back in v0.6.0, but was never added to `agents/__init__.py`'s imports and `__all__`. `from octochains.agents.presets import security_threat_hunter` worked; `from octochains.agents import security_threat_hunter` silently failed. Fixed alongside the rest of the Security preset export cleanup for this release.
+ 
 #### README Documentation Gaps
 Added the missing "Security" preset table to the README (previously undocumented despite `security_threat_hunter`, `insider_threat_analyst`, and `breach_notification_analyst` already being merged), and corrected the stale "9 available specialists" count to 13.
+ 
+---
 
 ## [0.6.0] - 2026-07-26
 
