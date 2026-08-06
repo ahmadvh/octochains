@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,8 @@ name = "octochains"
 version = "0.6.0"
 description = "An orchestration framework for reliable multi-agent decision-making, parallel isolated reasoning, and consensus aggregation."
 readme = "README.md"
-license = { text = "BSL-1.1" }
+license = "BUSL-1.1"
+license-files = ["LICENSE.md"]
 requires-python = ">=3.9"
 authors = [
     { name="Ahmad", email="ahmad.vh7@gmail.com" }
@@ -32,7 +33,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: Other/Proprietary License",
     "Operating System :: OS Independent",
     "Typing :: Typed",
 ]
