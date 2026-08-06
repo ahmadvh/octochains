@@ -10,6 +10,7 @@ from octochains.agents import presets
 from octochains.agents.presets import (
     cfo_agent, cto_agent, cro_agent, cpo_agent, cmo_agent,
     data_sovereignty_auditor, ai_risk_assessor, phi_sanitizer, licensing_reviewer, security_threat_hunter,insider_threat_analyst,
+    breach_notification_analyst,
 )
 
 # =============================================================================
@@ -34,6 +35,7 @@ ALL_PRESET_FACTORIES = [
     licensing_reviewer,
     security_threat_hunter,
     insider_threat_analyst,
+    breach_notification_analyst,
 ]
 
 EXPECTED_ROLES = {
@@ -48,6 +50,7 @@ EXPECTED_ROLES = {
     licensing_reviewer: "Open-Source Compliance Engineer",
     security_threat_hunter: "Security Threat Hunter",
     insider_threat_analyst: "Insider Threat Analyst",
+    breach_notification_analyst: "Breach Notification Analyst",
 }
 
 

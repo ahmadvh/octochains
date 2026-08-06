@@ -186,3 +186,17 @@ def insider_threat_analyst(llm_callable: LLMCallable,
         skills=base_skills + (extra_skills or []),
         output_format=output_format
     )
+
+def breach_notification_analyst(llm_callable: LLMCallable,
+                                extra_skills: Optional[List[Skill]] = None,
+                                output_format: Optional[Type[BaseModel]] = None,
+                                input_description: Optional[str] = None) -> SkilledAgent:
+    base_skills = _load_skills("octochains.agents.skills.security", "breach-notification-triage")
+    return SkilledAgent(
+        role="Breach Notification Analyst",
+        goal="Determine whether an incident involves personal data, triggers regulatory breach-notification obligations (e.g. GDPR Art. 33/34), and what notification timelines apply.",
+        input_description=input_description or "Security incident logs, data-access records, and affected-system inventories.",
+        llm_callable=llm_callable,
+        skills=base_skills + (extra_skills or []),
+        output_format=output_format
+    )
