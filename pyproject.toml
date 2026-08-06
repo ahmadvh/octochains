@@ -8,7 +8,7 @@ version = "0.6.0"
 description = "An orchestration framework for reliable multi-agent decision-making, parallel isolated reasoning, and consensus aggregation."
 readme = "README.md"
 license = "BUSL-1.1"
-license-files = ["LICENSE.md"]
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 authors = [
     { name="Ahmad", email="ahmad.vh7@gmail.com" }
