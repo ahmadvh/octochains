@@ -15,6 +15,7 @@ from .presets import (
     security_threat_hunter,
     insider_threat_analyst,
     breach_notification_analyst,
+    identity_access_auditor,
 )
 
 __all__ = [
@@ -34,4 +35,5 @@ __all__ = [
     "security_threat_hunter",
     "insider_threat_analyst",
     "breach_notification_analyst",
+    "identity_access_auditor",
 ]

@@ -200,3 +200,17 @@ def breach_notification_analyst(llm_callable: LLMCallable,
         skills=base_skills + (extra_skills or []),
         output_format=output_format
     )
+
+def identity_access_auditor(llm_callable: LLMCallable,
+                            extra_skills: Optional[List[Skill]] = None,
+                            output_format: Optional[Type[BaseModel]] = None,
+                            input_description: Optional[str] = None) -> SkilledAgent:
+    base_skills = _load_skills("octochains.agents.skills.security", "identity-access-anomaly-review")
+    return SkilledAgent(
+        role="Identity & Access Auditor",
+        goal="Analyze authentication logs for failed-login clustering, privilege-escalation chains, credential-stuffing patterns, and MFA-bypass indicators to determine how access was obtained.",
+        input_description=input_description or "Authentication/SSO logs, IAM change history, and MFA event logs.",
+        llm_callable=llm_callable,
+        skills=base_skills + (extra_skills or []),
+        output_format=output_format
+    )

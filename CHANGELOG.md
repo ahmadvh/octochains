@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-08-07
+
+### Added
+
+#### Identity & Access Auditor Preset
+Added `identity_access_auditor`, a new official Security preset analyzing authentication and authorization events, failed-login clustering, privilege-escalation chains, credential-stuffing patterns, and MFA-bypass indicators, to determine how access was obtained. Scoped strictly to the access-grant and authentication layer; complements `security_threat_hunter` (external intrusion) and `insider_threat_analyst` (post-login behavior) without overlapping either.
+
+### Fixed
+
+#### README Documentation Gaps
+Added the missing "Security" preset table to the README (previously undocumented despite `security_threat_hunter`, `insider_threat_analyst`, and `breach_notification_analyst` already being merged), and corrected the stale "9 available specialists" count to 13.
+
 ## [0.6.0] - 2026-07-26
 
 ### Added
