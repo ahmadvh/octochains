@@ -152,7 +152,7 @@ Never let a failed LLM call crash the Engine. Rely on `format_output()`'s existi
 
 ### Licensing of Contributions
 
-Octochains operates under a Fair-Code model, distributed under the **Business Source License 1.1** (see [LICENSE.md](LICENSE.md) for the full commercial-use restriction and 2030 sunset date).
+Octochains operates under a Fair-Code model, distributed under the **Business Source License 1.1** (see [LICENSE.md](LICENSE) for the full commercial-use restriction and 2030 sunset date).
 
 By submitting a pull request to this repository, you agree to the following:
 
