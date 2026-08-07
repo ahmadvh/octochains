@@ -13,6 +13,9 @@
 
 Unlike traditional sequential agent chains where models bias each other through shared chat histories, Octochains executes domain specialists in **Parallel Isolated Threads**. Every angle of a high-stakes decision, from clinical diagnostics to financial risk and legal audits, is evaluated in pristine isolation before being synthesized by a centralized verification layer.
 
+
+<img width="1774" height="887" alt="architecture-diagram" src="https://github.com/user-attachments/assets/b9fe9c2c-9ead-4639-8fbc-8e267ac442fb" />
+
 ## Why Octochains?
 
 Standard multi-agent frameworks suffer from **Cognitive Tunnel Vision** and **Groupthink**, where early outputs dictate downstream reasoning. Octochains eliminates this through a robust, thread-safe architecture:
