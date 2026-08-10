@@ -1,0 +1,2 @@
+anthropic>=0.40.0
+octochains>=0.6.0
