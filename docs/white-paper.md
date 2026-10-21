@@ -2,7 +2,7 @@
 
 **Engineering white paper**
 
-Prepared August 2026 · github.com/ahmadvh/octochains · v0.6.0 (Beta)
+Prepared August 2026 · github.com/ahmadvh/octochains · v0.7.0 (Beta)
 
 ---
 
